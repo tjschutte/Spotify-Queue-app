@@ -1,0 +1,43 @@
+<html>
+
+<head>
+    <title>Party Playlist</title>
+    <!--<link rel="icon" href="favicon.gif" type="image/x-icon"/>-->
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <style>
+        .content {
+            padding-top: 5px;
+            padding-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="vertical-center" id="page">
+        <div class="container">
+            <div class="col-md-6 col-md-offset-3 vertical-center content">
+                <h2>Welcome to Party Playlist!</h2>
+                <p>
+                    This is an app to create song queues for events and parties.  If you have Spotify Premium
+                    you can create a song queue now! If you are at an even with a queue already going, you
+                    can use their queue code to join now!
+                </p>
+            </div>
+
+            <div class="row buttons">
+                <div class="col-md-3 col-md-offset-3">
+                    <form action="/create" method="get">
+                        <button type="submit" class="btn btn-secondary btn-lg btn-block">Create</button>
+                    </form>
+                </div>
+                <div class="col-md-3">
+                    <form action="/join" method="get">
+                        <button type="submit" class="btn btn-secondary btn-lg btn-block">Join</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
