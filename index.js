@@ -12,7 +12,7 @@ const fs = require('fs');
 // Application specific stuff. From https://developer.spotify.com/
 const client_id = '124f0693c5084064ad7d8b4f1db5c55a'; // Your client id
 const client_secret = '8b6d017da5d5427ab77cffb4388cbff0'; // Your secret
-const redirect_uri = 'http://localhost:8888/create'; // Your redirect uri
+const redirect_uri = 'http://192.168.1.105:8888/create'; // Your redirect uri
 
 /**
  * Controllers (route handlers).
@@ -23,7 +23,6 @@ const utils = require('./utils/utilities');
 // auth state
 var stateKey = 'spotify_auth_state';
 var sessionKey = 'sessionKey';
-var keysInUse = [];
 
 /**
  * Create Express server.
@@ -58,19 +57,20 @@ app.use(bodyParser.json());
 app.get('/', controller.setup);
 app.get('/search', controller.search);
 app.get('/join', controller.join);
+app.get('/create', controller.create);
 
 // Control routes
 app.post('/add', controller.add);
 app.get('/get_songs', controller.get_songs);
 app.post('/play', controller.play);
+app.post('/find', controller.findQueue);
 
 // Redirect to login to spotify (gets us a key to use when searching)
 // Will also use the key when we want to connect to a use device for whoever does the
 // initial setup
-app.get('/create', function(req, res) {
+app.get('/setup', function(req, res) {
     var state = utils.randString(16);
 	var key = utils.randSessionKey();
-	keysInUse.push(key);
     res.cookie(stateKey, state);
 	res.cookie(sessionKey, key);
     // your application requests authorization

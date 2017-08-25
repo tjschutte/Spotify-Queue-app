@@ -383,9 +383,12 @@
                     console.log("error: " + err);
                 },
                 success: function(body) {
+					console.log(body);
                     var playing = body.playing;
                     var queue = body.songs;
-                    if (queue['songs'].length > 0 || playing) {
+					console.log(playing);
+					console.log(queue);
+                    if (queue.length > 0 || playing) {
                         var html = "";
                         if (playing != undefined) {
                             html +=
@@ -403,7 +406,7 @@
                                         <tr>\
                                     </table>";
                         }
-                        if (queue['songs'].length > 0) {
+                        if (queue.length > 0) {
                             html +=
                                 "<h2 class='text-center'>Coming up</h2>\
                                 <table style='width:100%'> \
@@ -412,8 +415,8 @@
                                         <th style='width:35%'>Song</th>\
                                         <th style='width:35%'>Artist</th>\
                                     </tr>";
-                            for (var i = 0; i < queue['songs'].length; i++) {
-                                var item = queue['songs'][i];
+                            for (var i = 0; i < queue.length; i++) {
+                                var item = queue[i];
                                 html += "<tr>\
                                             <td><img style='max-width: 100%' src=\"" + item.album_art_url + "\"/></td>\
                                             <td><h4>" + item.name + "</h4></td>\
