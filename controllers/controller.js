@@ -6,15 +6,12 @@ const cmd = require('node-cmd');
 // Application specific stuff. From https://developer.spotify.com/
 const client_id = '124f0693c5084064ad7d8b4f1db5c55a'; // Your client id
 const client_secret = '8b6d017da5d5427ab77cffb4388cbff0'; // Your secret
-const redirect_uri = 'http://192.168.1.105:8888/create'; // Your redirect uri
+const redirect_uri = 'http://localhost:8888/create'; // Your redirect uri
 
 // The list of songs added. Eventuall will need to tie this to a session key
 var queues = queues || {};
 
 var playing = playing || undefined;
-// My device_id. This will eventually have to come from somewhere else...
-var device_id = "66256ee675c4141175f2e07e74efcf5b45515b91";
-var song_timer;
 
 /**
  * GET. Login and redirect back to the search page.
@@ -99,13 +96,15 @@ exports.create = (req, res) => {
 				queues[sessionKey]['access_token'] = access_token;
 				queues[sessionKey]['songs'] = [];
 				queues[sessionKey]['playing'] = {};
+				queues[sessionKey]['sorted'] = true;
 				queues[sessionKey]['song_timer'] = undefined;
+				queues[sessionKey]['device_id'] = undefined;
 
 				console.log(queues);
 
                 // we can also pass the token to the browser to make requests from there
                 // this is so the page renders?
-                res.render('search.html', {
+                res.render('create.html', {
                     access_token: access_token,
                     song_list: JSON.stringify(queues[sessionKey]['songs']),
 					sessionKey: sessionKey
@@ -123,6 +122,7 @@ exports.create = (req, res) => {
 exports.add = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 	//console.log(sessionKey);
+	queues[sessionKey]['sorted'] = false;
 
     var options = {
         url: 'https://api.spotify.com/v1/tracks/' + req.body.uri.split(':')[2],
@@ -138,7 +138,8 @@ exports.add = (req, res) => {
             "name": body.name,
             "artist": body.artists[0].name,
             "duration_ms": body.duration_ms,
-            "album_art_url": body.album.images[0].url
+            "album_art_url": body.album.images[0].url,
+			"votes": 0
         }
         // console.log(body);
         // console.log(body.album.images);
@@ -156,6 +157,14 @@ exports.add = (req, res) => {
 exports.get_songs = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 
+	// Songs are not sorted, sort then go
+	if (!queues[sessionKey]['sorted']) {
+		queues[sessionKey]['songs'].sort(function(a, b) {
+			return b.votes - a.votes;
+		});
+		queues[sessionKey]['sorted'] = true;
+	}
+
 	if (!(sessionKey in queues)) {
 		var body = {
 	        'playing': 'Nothing yet',
@@ -172,7 +181,18 @@ exports.get_songs = (req, res) => {
 };
 
 function playNext(sessionKey) {
-    clearTimeout(queues[sessionKey]['song_timer']);
+
+	if (queues[sessionKey]['song_timer'] != undefined) {
+    	clearTimeout(queues[sessionKey]['song_timer']);
+	}
+
+	// Songs are not sorted, sort then go
+	if (!queues[sessionKey]['sorted']) {
+		queues[sessionKey]['songs'].sort(function(a, b) {
+			return b.votes - a.votes;
+		});
+		queues[sessionKey]['sorted'] = true;
+	}
 
 	var access_token = queues[sessionKey]['access_token'];
 
@@ -184,7 +204,7 @@ function playNext(sessionKey) {
         //console.log("Songs left in playlist:", songs['songs'].length);
 
         cmd_String = "curl -v -XPUT -H 'Authorization: Bearer " + access_token +
-            "' -H 'Content-type: application/json' -d '{\"device_id\": \"" + device_id + "\",\"uris\":[\"" + queues[sessionKey]['playing']['uri'] +"\"]}' \'https://api.spotify.com/v1/me/player/play\'";
+            "' -H 'Content-type: application/json' -d '{\"device_id\": \"" + queues[sessionKey]['device_id'] + "\",\"uris\":[\"" + queues[sessionKey]['playing']['uri'] +"\"]}' \'https://api.spotify.com/v1/me/player/play\'";
         //console.log(cmd_String);
         cmd.run(cmd_String);
 
@@ -209,7 +229,7 @@ exports.play = (req, res) => {
         console.log("Songs left in playlist:", queues[sessionKey]['songs'].length);
 
         cmd_String = "curl -v -XPUT -H 'Authorization: Bearer " + req.body.access_token +
-            "' -H 'Content-type: application/json' -d '{\"device_id\": \"" + device_id + "\",\"uris\":[\"" + queues[sessionKey]['playing']['uri'] +"\"]}' \'https://api.spotify.com/v1/me/player/play\'";
+            "' -H 'Content-type: application/json' -d '{\"device_id\": \"" + queues[sessionKey]['device_id'] + "\",\"uris\":[\"" + queues[sessionKey]['playing']['uri'] +"\"]}' \'https://api.spotify.com/v1/me/player/play\'";
 
         cmd.run(cmd_String);
 
@@ -221,9 +241,49 @@ exports.play = (req, res) => {
     res.send("Playing!");
 };
 
+exports.setDevice = (req, res) => {
+	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
+	queues[sessionKey]['device_id'] = req.body.device_id;
+	console.log('device id set to', req.body.device_id);
+	res.sendStatus(200);
+};
+
+exports.upvote = (req, res) => {
+	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
+	queues[sessionKey]['sorted'] = false;
+	//console.log("up-voted song was: ", req.body.uri);
+	//console.log(sessionKey);
+	var uri = req.body.uri;
+	for (var i = 0; i < queues[sessionKey]['songs'].length; i++) {
+		//console.log(queues[sessionKey]['songs'][i]);
+		if (queues[sessionKey]['songs'][i]['uri'] == uri) {
+			queues[sessionKey]['songs'][i]['votes']++;
+			//console.log(queues[sessionKey]['songs'][i]['name'], "at", queues[sessionKey]['songs'][i]['votes'])
+		}
+	}
+	res.sendStatus(200);
+};
+
+exports.downvote = (req, res) => {
+	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
+	queues[sessionKey]['sorted'] = false;
+	//console.log("down-voted song was: ", req.body.uri);
+	//console.log(sessionKey);
+	var uri = req.body.uri;
+	for (var i = 0; i < queues[sessionKey]['songs'].length; i++) {
+		//console.log(queues[sessionKey]['songs'][i]);
+		if (queues[sessionKey]['songs'][i]['uri'] == uri) {
+			queues[sessionKey]['songs'][i]['votes']--;
+			//console.log(queues[sessionKey]['songs'][i]['name'], "at", queues[sessionKey]['songs'][i]['votes'])
+		}
+	}
+	res.sendStatus(200);
+};
+
 exports.join = (req, res) => {
     res.render('join.html');
-}
+};
+
  exports.setup = (req,res) => {
     res.render('setup.html');
- }
+};

@@ -163,6 +163,21 @@
             <div class="row">
                 <div class="col-sm-6 col-sm-offset-3">
                     <div id="imaginary_container">
+						<p>
+							This is the master session page. </br>
+							<b>DO NOT REFRESH THIS PAGE, YOUR SESSION WILL BE LOST.</b></br>
+							<b>DO NOT USE YOUR SPOTIFY APP TO CONTROL MUSIC OTHER THAN VOLUME.</b>
+						</p>
+						<h4>
+							Setup:
+						</h4>
+						<ol>
+							<li>Open spotify on the computer you wish to play music through.</li>
+							<li>play a song throught the spotify app (Sets a value on spotify side)</li>
+							<li>Use 'Find Devices' button below to bring up your availabel devices.</li>
+							<li>Select your device</li>
+							<li>Add songs! Your friends can connect to your session using your session key: <%= sessionKey %></li>
+						</ol>
                         <div class="input-group stylish-input-group">
                             <input type="text" class="form-control" placeholder="Search... '!commands' for help" id="search-text-box">
                             <span class="input-group-addon" id="search-button">
@@ -170,6 +185,7 @@
                                     <span class="glyphicon glyphicon-search"></span>
                             </button>
                             <button type="button" id="show-playlist-button" onclick="showMeWhatYouGot()">Show Playlist</button>
+							<button type="button" id="show-devices" onclick="getInfo()">Find Devices</button>
                             </span>
                         </div>
                     </div>
@@ -192,13 +208,41 @@
             });
         });
 
+        function decodeHtml(html) {
+            var txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
+        }
+
         var access_token = "<%= access_token %>";
+        var song_list = decodeHtml("<%= song_list %>");
 		var sessionKey = "<%= sessionKey %>";
         var displayMode;
 
 		function showKey() {
 			$('#search-results').html("<h3 class='text-center'>Your session key is: " + sessionKey + "</h3>");
 		}
+
+        function play() {
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json',
+                url: '/play',
+                data: JSON.stringify({
+                    access_token: access_token
+                }),
+                error: function(xhr, textStatus, err) {
+                    console.log("readyState: " + xhr.readyState);
+                    console.log("responseText: " + xhr.responseText);
+                    console.log("status: " + xhr.status);
+                    console.log("text status: " + textStatus);
+                    console.log("error: " + err);
+                },
+                success: function() {
+                    //console.log("");
+                }
+            });
+        }
 
         function display() {
             $('#search-text-box').hide();
@@ -214,6 +258,8 @@
 
 		function showCommands() {
 			$('#search-results').html("<h3 class='text-center'>Valid commands are: </br>\
+				!play - plays the playlist</br>\
+				!skip - skip the playing song</br>\
 				!showkey - show your session key so others may join</br>\
 				!commands - show this help messege</br>\
 				</h3>");
@@ -222,9 +268,21 @@
         function command(commandString) {
             var cmd = commandString.substring(1).toLowerCase();
             switch (cmd) {
+                case "play":
+                case "play()":
+                    play();
+                    break;
+                case "skip":
+                case "skip()":
+                    play();
+                    break;
                 case "display":
                 case "display()":
                     display();
+                    break;
+                case "stop":
+                case "stop()":
+                    console.log("Doesnt exist yet...");
                     break;
 				case "showkey":
 				case "showkey()":
@@ -243,8 +301,6 @@
         }
 
         function search() {
-			// Cancel displayMode
-            clearTimeout(displayMode);
             // Get the search terms
             var params = $('#search-text-box').val();
             // clear the text box
@@ -254,6 +310,9 @@
                 command(params);
                 return;
             }
+
+            // Cancel displayMode
+            clearTimeout(displayMode);
 
             //setup the querystring
             var query = "?q=" + params.replace(/ /g, '+') + "&type=track&markert=US&limit=5";
@@ -345,7 +404,7 @@
                     var queue = body.songs;
 					console.log(playing);
 					console.log(queue);
-                    if (queue.length > 0 || playing ) {
+                    if (queue.length > 0 || playing) {
                         var html = "";
                         if (playing != undefined && playing.name != undefined) {
                             html +=
@@ -369,25 +428,15 @@
                                 <table style='width:100%'> \
                                     <tr>\
                                         <th style='width:30%'></th>\
-                                        <th style='width:30%'>Song</th>\
-                                        <th style='width:30%'>Artist</th>\
-										<th style='width:10%'>Votes</th>\
+                                        <th style='width:35%'>Song</th>\
+                                        <th style='width:35%'>Artist</th>\
                                     </tr>";
                             for (var i = 0; i < queue.length; i++) {
                                 var item = queue[i];
                                 html += "<tr>\
                                             <td><img style='max-width: 100%' src=\"" + item.album_art_url + "\"/></td>\
                                             <td><h4>" + item.name + "</h4></td>\
-                                            <td><h4>" + item.artist + "</h4></td>\
-											<td>\
-												<div class='input-group stylish-input-group'>\
-												 	<span class='input-group-addon'>\
-														<button type='button' onclick=tryUpvote('" + item.uri + "')><span class='glyphicon glyphicon-arrow-up'></span></button></br>\
-														<button type='button' onclick=tryDownvote('" + item.uri + "')><span class='glyphicon glyphicon-arrow-down'></span></button>\
-													</span>\
-												</div>\
-											 	<h4 class='text-center'>" + item.votes + "</h4>\
-											</td>\
+                                             <td><h4>" + item.artist + "</h4></td>\
                                         </tr>";
                             }
                             html += "</table>";
@@ -403,41 +452,60 @@
             displayMode = setTimeout(showMeWhatYouGot, 2000);
         }
 
-		function tryUpvote(uri) {
-			//console.log('You attempted to up-vote: ' + uri);
+        function getInfo() {
+            $.ajax({
+              type: "GET",
+              url: 'https://api.spotify.com/v1/me/player/devices',
+              headers: {
+                'Authorization': 'Bearer ' + access_token,
+                'Accept': 'application/json'
+              },
+              success: function(response) {
+                  console.log('Success');
+                  console.log(response);
+				  var html;
+				  if (response.devices.length != 0) {
+					  html =
+						  "<table style='width:100%' class='table-fill'> \
+							  <thead>\
+								  <th style='width:45%'>Device Name</th>\
+								  <th style='width:45%'>Device Type</th>\
+								  <th style='width:10%'>Use?</th>\
+							  </thead>";
+					  for (var i = 0; i < response.devices.length; i++) {
+						  var item = response.devices[i];
+						  html += "<tbody class='table-hover'>\
+									  <tr>" +
+										  "<td>" + item.name + "</td>\
+										  <td>" + item.type + "</td>\
+										  <td class='text-center'>" +
+											  "<button class='add-button' onclick=setDevice('" + item.id + "')>USE</button>\
+										  </td>\
+									  </tr>\
+								  </tbody>";
+					  }
+					  html += "</table>";
 
-			$.ajax({
-                type: 'POST',
-                data: JSON.stringify({
-                    "uri": uri,
-                    "sessionKey": sessionKey
-                }),
-                contentType: 'application/json',
-                url: '/upvote',
-                error: function(xhr, textStatus, err) {
-                    console.log("readyState: " + xhr.readyState);
-                    console.log("responseText: " + xhr.responseText);
-                    console.log("status: " + xhr.status);
-                    console.log("text status: " + textStatus);
-                    console.log("error: " + err);
-                },
-                success: function() {
-
-                }
+				  } else {
+					  html = "<h3 class='text-center'>We couldn't find any devices...</h3>"
+				  }
+				  $('#search-results').html(html);
+              },
+              error: function(error) {
+                  console.log('Error');
+                  console.log(error);
+              }
             });
-		}
+        }
 
-		function tryDownvote(uri) {
-			//console.log('You attempted to down-vote: ' + uri);
-
+		function setDevice(device_id) {
 			$.ajax({
                 type: 'POST',
                 data: JSON.stringify({
-                    "uri": uri,
-                    "sessionKey": sessionKey
+                    "device_id": device_id,
                 }),
                 contentType: 'application/json',
-                url: '/downvote',
+                url: '/device',
                 error: function(xhr, textStatus, err) {
                     console.log("readyState: " + xhr.readyState);
                     console.log("responseText: " + xhr.responseText);
@@ -446,7 +514,7 @@
                     console.log("error: " + err);
                 },
                 success: function() {
-
+                    $('#search-results').html("<h2 class='text-center'>Device Set!</h2>");
                 }
             });
 		}
