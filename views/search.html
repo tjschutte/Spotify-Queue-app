@@ -161,7 +161,7 @@
     <div class="vertical-center" id="page">
         <div class="container">
             <div class="row">
-                <div class="col-sm-6 col-sm-offset-3">
+                <div class="col-md-10 col-md-offset-1">
                     <div id="imaginary_container">
                         <div class="input-group stylish-input-group">
                             <input type="text" class="form-control" placeholder="Search... '!commands' for help" id="search-text-box">
@@ -169,15 +169,15 @@
                                 <button onclick="search()">
                                     <span class="glyphicon glyphicon-search"></span>
                             </button>
-                            <button type="button" id="show-playlist-button" onclick="showMeWhatYouGot()">Show Playlist</button>
+                            <button type="button" id="show-playlist-button" onclick="showMeWhatYouGot()">Show Queue</button>
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-8 col-sm-offset-2" id="search-results">
-                    <h2 class='text-center'>Try searching for something, or click Show Playlist</h2>
+                <div class="col-md-10 col-md-offset-1" id="search-results">
+                    <h2 class='text-center'>Try searching for something, or click Show Queue</h2>
                 </div>
             </div>
         </div>
@@ -213,9 +213,11 @@
         }
 
 		function showCommands() {
-			$('#search-results').html("<h3 class='text-center'>Valid commands are: </br>\
-				!showkey - show your session key so others may join</br>\
-				!commands - show this help messege</br>\
+			$('#search-results').html("\
+				<h3 class='text-center'>\
+					Valid commands are: </br>\
+					!showkey - show your session key so others may join</br>\
+					!commands - show this help messege</br>\
 				</h3>");
 		}
 
@@ -255,7 +257,7 @@
                 return;
             }
 
-            //setup the querystring
+            // setup the querystring (remove spaces)
             var query = "?q=" + params.replace(/ /g, '+') + "&type=track&markert=US&limit=5";
 
             if (!params || 0 === params.length || !params.trim()) {

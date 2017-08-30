@@ -76,21 +76,6 @@ exports.create = (req, res) => {
                 var access_token = temp.access_token,
                     refresh_token = temp.refresh_token;
 
-                var options = {
-                    url: 'https://api.spotify.com/v1/me',
-                    headers: {
-                        'Authorization': 'Bearer ' + access_token
-                    },
-                    json: true
-                };
-
-                // No idea what this does right now
-                // use the access token to access the Spotify Web API
-                request.get(options, function(error, response, body) {
-                    // user token thing
-                    //console.log(body);
-                });
-
 				queues[sessionKey] = {};
 				queues[sessionKey]['key'] = sessionKey;
 				queues[sessionKey]['access_token'] = access_token;
@@ -100,6 +85,7 @@ exports.create = (req, res) => {
 				queues[sessionKey]['song_timer'] = undefined;
 				queues[sessionKey]['device_id'] = undefined;
 
+				// Log sessions to the console.
 				console.log(queues);
 
                 // we can also pass the token to the browser to make requests from there
@@ -157,6 +143,10 @@ exports.add = (req, res) => {
 exports.get_songs = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 
+	if (sessionKey == 'No key' || queues[sessionKey] == undefined) {
+		res.sendStatus(400);
+	}
+
 	// Songs are not sorted, sort then go
 	if (!queues[sessionKey]['sorted']) {
 		queues[sessionKey]['songs'].sort(function(a, b) {
@@ -178,6 +168,38 @@ exports.get_songs = (req, res) => {
 	    }
 	    res.send(body);
 	}
+};
+
+exports.set_songs = (req, res) => {
+	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
+	//console.log(req.body.userID, req.body.playlistID);
+
+	var options = {
+        url: 'https://api.spotify.com/v1/users/' + req.body.userID + '/playlists/' + req.body.playlistID + '/tracks',
+        headers: {
+            'Authorization': 'Bearer ' + queues[sessionKey]['access_token']
+        },
+        json: true
+    };
+
+    request.get(options, function(error, response, body) {
+		//console.log(body);
+		for (var i = 0; i < body.items.length; i++) {
+			var track = body.items[i].track;
+			var songInfo = {
+				"uri": track.uri,
+				"name": track.name,
+				"artist": track.artists[0].name,
+				"duration_ms": track.duration_ms,
+				"album_art_url": track.album.images[0].url,
+				"votes": 0
+			}
+
+			queues[sessionKey]['songs'].push(songInfo);
+		}
+	});
+
+	res.sendStatus(200);
 };
 
 function playNext(sessionKey) {
@@ -208,10 +230,10 @@ function playNext(sessionKey) {
         //console.log(cmd_String);
         cmd.run(cmd_String);
 
-        queues[sessionKey]['song_timer'] = setTimeout(playNext, length_ms, access_token);
+        queues[sessionKey]['song_timer'] = setTimeout(playNext, length_ms, sessionKey);
 
     } else {
-        console.log("Queue is empty");
+        //console.log("Queue is empty");
     }
 }
 
@@ -225,8 +247,8 @@ exports.play = (req, res) => {
     if (queues[sessionKey]['songs'].length != 0) {
         queues[sessionKey]['playing'] = queues[sessionKey]['songs'].shift();
         var length_ms = queues[sessionKey]['playing']['duration_ms'];
-        console.log("Now playing:", queues[sessionKey]['playing']);
-        console.log("Songs left in playlist:", queues[sessionKey]['songs'].length);
+        //console.log("Now playing:", queues[sessionKey]['playing']);
+        //console.log("Songs left in playlist:", queues[sessionKey]['songs'].length);
 
         cmd_String = "curl -v -XPUT -H 'Authorization: Bearer " + req.body.access_token +
             "' -H 'Content-type: application/json' -d '{\"device_id\": \"" + queues[sessionKey]['device_id'] + "\",\"uris\":[\"" + queues[sessionKey]['playing']['uri'] +"\"]}' \'https://api.spotify.com/v1/me/player/play\'";
@@ -236,9 +258,9 @@ exports.play = (req, res) => {
         queues[sessionKey]['song_timer'] = setTimeout(playNext, length_ms, sessionKey);
 
     } else {
-        console.log("Add some songs to play!");
+        //console.log("Add some songs to play!");
     }
-    res.send("Playing!");
+    res.sendStatus(200);
 };
 
 exports.setDevice = (req, res) => {

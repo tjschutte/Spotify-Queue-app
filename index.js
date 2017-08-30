@@ -67,6 +67,7 @@ app.post('/find', controller.findQueue);
 app.post('/device', controller.setDevice);
 app.post('/upvote', controller.upvote);
 app.post('/downvote', controller.downvote);
+app.post('/setSongs', controller.set_songs);
 
 // Redirect to login to spotify (gets us a key to use when searching)
 // Will also use the key when we want to connect to a use device for whoever does the

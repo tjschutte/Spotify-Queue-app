@@ -11,32 +11,44 @@
             padding-top: 5px;
             padding-bottom: 15px;
         }
+		.vertical-center {
+            min-height: 100%;
+            /* Fallback for browsers do NOT support vh unit */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
     <div class="vertical-center" id="page">
         <div class="container">
-            <div class="col-md-6 col-md-offset-3 vertical-center content">
-                <h2>Welcome to Party Playlist! <span class="label label-info">BETA!</span></h2>
-                <p>
-                    This is an app to create song queues for events and parties.  If you have Spotify Premium
-                    you can create a song queue now! If you are at an event with a queue already going, you
-                    can use their queue code to join now!
-                </p>
-            </div>
+			<div class="row">
+	            <div class="col-md-8 col-md-offset-2 content">
+	                <h2>Welcome to Party Playlist! <span class="label label-info">BETA</span></h2>
+	                <p>
+	                    This is an app to create song queues for events and parties.  If you have Spotify Premium
+	                    you can create a song queue now! If you are at an event with a queue already going, you
+	                    can use their queue code to join now!
+	                </p>
+					<p>
+						<b>NOTE:</B> Queues currently expire after one (1) hour.
+					</p>
+	            </div>
 
-            <div class="row buttons">
-                <div class="col-md-3 col-md-offset-3">
-                    <form action="/setup" method="get">
-                        <button type="submit" class="btn btn-secondary btn-lg btn-block">Create</button>
-                    </form>
-                </div>
-                <div class="col-md-3">
-                    <form action="/join" method="get">
-                        <button type="submit" class="btn btn-secondary btn-lg btn-block">Join</button>
-                    </form>
-                </div>
-            </div>
+	            <div class="row buttons">
+	                <div class="col-md-4 col-md-offset-2">
+	                    <form action="/setup" method="get">
+	                        <button type="submit" class="btn btn-secondary btn-lg btn-block">Create</button>
+	                    </form>
+	                </div>
+	                <div class="col-md-4">
+	                    <form action="/join" method="get">
+	                        <button type="submit" class="btn btn-secondary btn-lg btn-block">Join</button>
+	                    </form>
+	                </div>
+	            </div>
+			</div>
         </div>
     </div>
 </body>

@@ -1,168 +1,167 @@
 <html>
 
 <head>
-    <title>Party Playlist</title>
-    <link rel="icon" href="favicon.gif" type="image/x-icon"/>
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <style type="text/css">
-        .stylish-input-group .input-group-addon {
-            background: white !important;
-        }
+	<title>Party Playlist</title>
+	<link rel="icon" href="favicon.gif" type="image/x-icon" />
+	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<style type="text/css">
+		.stylish-input-group .input-group-addon {
+			background: white !important;
+		}
 
-        .stylish-input-group .form-control {
-            border-right: 0;
-            box-shadow: 0 0 0;
-            border-color: #ccc;
-        }
+		.stylish-input-group .form-control {
+			border-right: 0;
+			box-shadow: 0 0 0;
+			border-color: #ccc;
+		}
 
-        .stylish-input-group button {
-            border: 0;
-            background: transparent;
-        }
+		.stylish-input-group button {
+			border: 0;
+			background: transparent;
+		}
 
-        .vertical-center {
-            min-height: 100%;
-            /* Fallback for browsers do NOT support vh unit */
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-        }
+		.vertical-center {
+			min-height: 100%;
+			/* Fallback for browsers do NOT support vh unit */
+			min-height: 100vh;
+			display: flex;
+			align-items: center;
+		}
 
-        .add-button {
-            background-color: #4CAF50;
-            /* Green */
-            border: none;
-            color: white;
-            padding: 10px 15px 10px 15px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-        }
+		.add-button {
+			background-color: #4CAF50;
+			/* Green */
+			border: none;
+			color: white;
+			padding: 10px 15px 10px 15px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			font-size: 14px;
+		}
+		/*** Table Styles **/
 
-        /*** Table Styles **/
+		.table-fill {
+			background: #444444;
+			border-radius: 3px;
+			border-collapse: collapse;
+			height: 320px;
+			margin: auto;
+			max-width: 600px;
+			padding: 5px;
+			width: 100%;
+			box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+			animation: float 5s infinite;
+		}
 
-        .table-fill {
-            background: #444444;
-            border-radius: 3px;
-            border-collapse: collapse;
-            height: 320px;
-            margin: auto;
-            max-width: 600px;
-            padding: 5px;
-            width: 100%;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-            animation: float 5s infinite;
-        }
+		th {
+			color: #D5DDE5;
+			background: #1b1e24;
+			border-bottom: 4px solid #9ea7af;
+			border-right: 1px solid #343a45;
+			font-size: 16px;
+			font-weight: 100;
+			padding: 16px;
+			text-align: left;
+			text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+			vertical-align: middle;
+		}
 
-        th {
-            color: #D5DDE5;
-            background: #1b1e24;
-            border-bottom: 4px solid #9ea7af;
-            border-right: 1px solid #343a45;
-            font-size: 16px;
-            font-weight: 100;
-            padding: 16px;
-            text-align: left;
-            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-            vertical-align: middle;
-        }
+		th:first-child {
+			border-top-left-radius: 3px;
+		}
 
-        th:first-child {
-            border-top-left-radius: 3px;
-        }
+		th:last-child {
+			border-top-right-radius: 3px;
+			border-right: none;
+		}
 
-        th:last-child {
-            border-top-right-radius: 3px;
-            border-right: none;
-        }
+		tr {
+			border-top: 1px solid #C1C3D1;
+			border-bottom: 1px solid #C1C3D1;
+			color: #666B85;
+			font-size: 16px;
+			font-weight: normal;
+			text-shadow: 0 1px 1px rgba(256, 256, 256, 0.1);
+		}
 
-        tr {
-            border-top: 1px solid #C1C3D1;
-            border-bottom: 1px solid #C1C3D1;
-            color: #666B85;
-            font-size: 16px;
-            font-weight: normal;
-            text-shadow: 0 1px 1px rgba(256, 256, 256, 0.1);
-        }
+		tr:hover td {
+			background: #4E5066;
+			color: #FFFFFF;
+			border-top: 1px solid #22262e;
+			border-bottom: 1px solid #22262e;
+		}
 
-        tr:hover td {
-            background: #4E5066;
-            color: #FFFFFF;
-            border-top: 1px solid #22262e;
-            border-bottom: 1px solid #22262e;
-        }
+		tr:first-child {
+			border-top: none;
+		}
 
-        tr:first-child {
-            border-top: none;
-        }
+		tr:last-child {
+			border-bottom: none;
+		}
 
-        tr:last-child {
-            border-bottom: none;
-        }
+		tr:nth-child(odd) td {
+			background: #EBEBEB;
+		}
 
-        tr:nth-child(odd) td {
-            background: #EBEBEB;
-        }
+		tr:nth-child(odd):hover td {
+			background: #4E5066;
+		}
 
-        tr:nth-child(odd):hover td {
-            background: #4E5066;
-        }
+		tr:last-child td:first-child {
+			border-bottom-left-radius: 3px;
+		}
 
-        tr:last-child td:first-child {
-            border-bottom-left-radius: 3px;
-        }
+		tr:last-child td:last-child {
+			border-bottom-right-radius: 3px;
+		}
 
-        tr:last-child td:last-child {
-            border-bottom-right-radius: 3px;
-        }
+		td {
+			background: #FFFFFF;
+			padding: 8px;
+			text-align: left;
+			vertical-align: middle;
+			font-weight: 200;
+			font-size: 12px;
+			text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
+			border-right: 1px solid #C1C3D1;
+		}
 
-        td {
-            background: #FFFFFF;
-            padding: 8px;
-            text-align: left;
-            vertical-align: middle;
-            font-weight: 200;
-            font-size: 12px;
-            text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
-            border-right: 1px solid #C1C3D1;
-        }
+		td:last-child {
+			border-right: 0px;
+		}
 
-        td:last-child {
-            border-right: 0px;
-        }
+		th.text-left {
+			text-align: left;
+		}
 
-        th.text-left {
-            text-align: left;
-        }
+		th.text-center {
+			text-align: center;
+		}
 
-        th.text-center {
-            text-align: center;
-        }
+		th.text-right {
+			text-align: right;
+		}
 
-        th.text-right {
-            text-align: right;
-        }
+		td.text-left {
+			text-align: left;
+		}
 
-        td.text-left {
-            text-align: left;
-        }
+		td.text-center {
+			text-align: center;
+		}
 
-        td.text-center {
-            text-align: center;
-        }
-
-        td.text-right {
-            text-align: right;
-        }
-    </style>
-    <div class="vertical-center" id="page">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-6 col-sm-offset-3">
-                    <div id="imaginary_container">
+		td.text-right {
+			text-align: right;
+		}
+	</style>
+	<div class="vertical-center" id="page">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-10 col-md-offset-1">
+					<div id="imaginary_container">
 						<p>
 							This is the master session page. </br>
 							<b>DO NOT REFRESH THIS PAGE, YOUR SESSION WILL BE LOST.</b></br>
@@ -173,242 +172,243 @@
 						</h4>
 						<ol>
 							<li>Open spotify on the computer you wish to play music through.</li>
-							<li>play a song throught the spotify app (Sets a value on spotify side)</li>
-							<li>Use 'Find Devices' button below to bring up your availabel devices.</li>
-							<li>Select your device</li>
-							<li>Add songs! Your friends can connect to your session using your session key: <%= sessionKey %></li>
+							<li>play a song through the spotify app (Sets a value on spotify side)</li>
+							<li>Use <button type="button" id="show-devices" onclick="getInfo()">Find Devices</button> to bring up your available devices.</li>
+							<li>Select the computer device that you played music on previously</li>
+							<li>Add songs via search, or preload the queue with up to 100 songs from one of <button type="button" id="show-devices" onclick="getPlaylists()">your playlists!</button></li>
+							<li>Your friends can connect to your session using your session key: <%= sessionKey %></li>
 						</ol>
-                        <div class="input-group stylish-input-group">
-                            <input type="text" class="form-control" placeholder="Search... '!commands' for help" id="search-text-box">
-                            <span class="input-group-addon" id="search-button">
+						<div class="input-group stylish-input-group">
+							<input type="text" class="form-control" placeholder="Search... '!commands' for help" id="search-text-box">
+							<span class="input-group-addon" id="search-button">
                                 <button onclick="search()">
                                     <span class="glyphicon glyphicon-search"></span>
-                            </button>
-                            <button type="button" id="show-playlist-button" onclick="showMeWhatYouGot()">Show Playlist</button>
-							<button type="button" id="show-devices" onclick="getInfo()">Find Devices</button>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-8 col-sm-offset-2" id="search-results">
-                    <h2 class='text-center'>Try searching for something, or click Show Playlist</h2>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        // When the document has loaded, add some listeners to the search objects
-        $(document).ready(function() {
-            $('#search-text-box').keydown(function(event) {
-                if (event.keyCode == 13) {
-                    search();
-                }
-            });
-        });
+							</button>
+							<button type="button" id="show-playlist-button" onclick="showMeWhatYouGot()">Show Queue</button>
+							<button type="button" id="show-devices" onclick="play()">Play</button>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-10 col-md-offset-1" id="search-results">
+					<h2 class='text-center'>Try searching for something, or click Show Queue</h2>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		// When the document has loaded, add some listeners to the search objects
+		$(document).ready(function() {
+			$('#search-text-box').keydown(function(event) {
+				if (event.keyCode == 13) {
+					search();
+				}
+			});
+		});
 
-        function decodeHtml(html) {
-            var txt = document.createElement("textarea");
-            txt.innerHTML = html;
-            return txt.value;
-        }
-
-        var access_token = "<%= access_token %>";
-        var song_list = decodeHtml("<%= song_list %>");
+		var access_token = "<%= access_token %>";
 		var sessionKey = "<%= sessionKey %>";
-        var displayMode;
+		var displayMode;
 
 		function showKey() {
 			$('#search-results').html("<h3 class='text-center'>Your session key is: " + sessionKey + "</h3>");
 		}
 
-        function play() {
-            $.ajax({
-                type: 'POST',
-                contentType: 'application/json',
-                url: '/play',
-                data: JSON.stringify({
-                    access_token: access_token
-                }),
-                error: function(xhr, textStatus, err) {
-                    console.log("readyState: " + xhr.readyState);
-                    console.log("responseText: " + xhr.responseText);
-                    console.log("status: " + xhr.status);
-                    console.log("text status: " + textStatus);
-                    console.log("error: " + err);
-                },
-                success: function() {
-                    //console.log("");
-                }
-            });
-        }
+		function play() {
+			$.ajax({
+				type: 'POST',
+				contentType: 'application/json',
+				url: '/play',
+				data: JSON.stringify({
+					access_token: access_token
+				}),
+				error: function(xhr, textStatus, err) {
+					console.log("readyState: " + xhr.readyState);
+					console.log("responseText: " + xhr.responseText);
+					console.log("status: " + xhr.status);
+					console.log("text status: " + textStatus);
+					console.log("error: " + err);
+				},
+				success: function() {
+					//console.log("");
+				}
+			});
+		}
 
-        function display() {
-            $('#search-text-box').hide();
-            $('#search-button').hide();
-            $('#show-playlist-button').hide();
-            showMeWhatYouGot();
-            $('#page').click(function(){
-                $('#search-text-box').show();
-                $('#search-button').show();
-                $('#show-playlist-button').show();
-            });
-        }
+		function display() {
+			$('#search-text-box').hide();
+			$('#search-button').hide();
+			$('#show-playlist-button').hide();
+			showMeWhatYouGot();
+			$('#page').click(function() {
+				$('#search-text-box').show();
+				$('#search-button').show();
+				$('#show-playlist-button').show();
+			});
+		}
 
 		function showCommands() {
-			$('#search-results').html("<h3 class='text-center'>Valid commands are: </br>\
+			$('#search-results').html(
+				"<h3 class='text-center'>Valid commands are: </br>\
 				!play - plays the playlist</br>\
 				!skip - skip the playing song</br>\
 				!showkey - show your session key so others may join</br>\
+				!playlists - displays your playlists, you use them to preload the queue\
 				!commands - show this help messege</br>\
-				</h3>");
+				</h3>"
+			);
 		}
 
-        function command(commandString) {
-            var cmd = commandString.substring(1).toLowerCase();
-            switch (cmd) {
-                case "play":
-                case "play()":
-                    play();
-                    break;
-                case "skip":
-                case "skip()":
-                    play();
-                    break;
-                case "display":
-                case "display()":
-                    display();
-                    break;
-                case "stop":
-                case "stop()":
-                    console.log("Doesnt exist yet...");
-                    break;
+		function command(commandString) {
+			var cmd = commandString.substring(1).toLowerCase();
+			switch (cmd) {
+				case "play":
+				case "play()":
+					play();
+					break;
+				case "skip":
+				case "skip()":
+					play();
+					break;
+				case "display":
+				case "display()":
+					display();
+					break;
+				case "stop":
+				case "stop()":
+					console.log("Doesnt exist yet...");
+					break;
 				case "showkey":
 				case "showkey()":
 					showKey();
+					break;
+				case "playlists":
+				case "playlists()":
+					getPlaylists();
 					break;
 				case "commands":
 				case "commands()":
 					showCommands();
 					break;
-                default:
-                console.log("Invalid command:", cmd);
-                $('#search-results').html("<h3 class='text-center'>Invalid Command: '\
+				default:
+					console.log("Invalid command:", cmd);
+					$('#search-results').html("<h3 class='text-center'>Invalid Command: '\
 					" + cmd + "' use '!commands' for help</h3>");
-                break;
-            }
-        }
+					break;
+			}
+		}
 
-        function search() {
-            // Get the search terms
-            var params = $('#search-text-box').val();
-            // clear the text box
-            $('#search-text-box').val("");
+		function search() {
+			// Get the search terms
+			var params = $('#search-text-box').val();
+			// clear the text box
+			$('#search-text-box').val("");
 
-            if (params.charAt() === "!") {
-                command(params);
-                return;
-            }
+			if (params.charAt() === "!") {
+				command(params);
+				return;
+			}
 
-            // Cancel displayMode
-            clearTimeout(displayMode);
+			// Cancel displayMode
+			clearTimeout(displayMode);
 
-            //setup the querystring
-            var query = "?q=" + params.replace(/ /g, '+') + "&type=track&markert=US&limit=5";
+			//setup the querystring
+			var query = "?q=" + params.replace(/ /g, '+') + "&type=track&markert=US&limit=5";
 
-            if (!params || 0 === params.length || !params.trim()) {
-                $('#search-results').html("<h2>Type something in the search box first.</h2>");
-                return;
-            }
+			if (!params || 0 === params.length || !params.trim()) {
+				$('#search-results').html("<h2>Type something in the search box first.</h2>");
+				return;
+			}
 
-            $.ajax({
-                type: "GET",
-                url: 'https://api.spotify.com/v1/search' + query,
-                headers: {
-                    'Authorization': 'Bearer ' + access_token
-                },
-                success: function(response) {
-                    var html;
-                    if (response.tracks.items.length != 0) {
-                        html =
-                            "<table style='width:100%' class='table-fill'> \
+			$.ajax({
+				type: "GET",
+				url: 'https://api.spotify.com/v1/search' + query,
+				headers: {
+					'Authorization': 'Bearer ' + access_token
+				},
+				success: function(response) {
+					var html;
+					if (response.tracks.items.length != 0) {
+						html =
+							"<table style='width:100%' class='table-fill'> \
                                 <thead>\
                                     <th style='width:45%'>Song</th>\
                                     <th style='width:45%'>Artist</th>\
                                     <th style='width:10%'>Add</th>\
                                 </thead>";
-                        for (var i = 0; i < response.tracks.items.length; i++) {
-                            var item = response.tracks.items[i];
-                            html += "<tbody class='table-hover'>\
+						for (var i = 0; i < response.tracks.items.length; i++) {
+							var item = response.tracks.items[i];
+							html += "<tbody class='table-hover'>\
                                         <tr>" +
-                                            "<td>" + item.name + "</td>\
+								"<td>" + item.name + "</td>\
                                             <td>" + item.artists[0].name + "</td>\
                                             <td class='text-center'>" +
-                                                "<button class='add-button' onclick=addSong('" + item.uri + "')>Add</button>\
+								"<button class='add-button' onclick=addSong('" + item.uri + "')>Add</button>\
                                             </td>\
                                         </tr>\
                                     </tbody>";
-                        }
-                        html += "</table>";
+						}
+						html += "</table>";
 
-                    } else {
-                        html = "<h3 class='text-center'>We couldn't find the song you are looking for.</h3>"
-                    }
-                    $('#search-results').html(html);
+					} else {
+						html = "<h3 class='text-center'>We couldn't find the song you are looking for.</h3>"
+					}
+					$('#search-results').html(html);
 
-                },
-                error: function(error) {
-                    console.log(error);
-                }
-            });
+				},
+				error: function(error) {
+					console.log(error);
+				}
+			});
 
-        }
+		}
 
-        function addSong(uri) {
-            $.ajax({
-                type: 'POST',
-                data: JSON.stringify({
-                    "uri": uri,
-                    access_token: access_token
-                }),
-                contentType: 'application/json',
-                url: '/add',
-                error: function(xhr, textStatus, err) {
-                    console.log("readyState: " + xhr.readyState);
-                    console.log("responseText: " + xhr.responseText);
-                    console.log("status: " + xhr.status);
-                    console.log("text status: " + textStatus);
-                    console.log("error: " + err);
-                },
-                success: function() {
-                    $('#search-results').html("<h2 class='text-center'>Song Added!</h2>");
-                }
-            });
-        }
+		function addSong(uri) {
+			$.ajax({
+				type: 'POST',
+				data: JSON.stringify({
+					"uri": uri,
+					access_token: access_token
+				}),
+				contentType: 'application/json',
+				url: '/add',
+				error: function(xhr, textStatus, err) {
+					console.log("readyState: " + xhr.readyState);
+					console.log("responseText: " + xhr.responseText);
+					console.log("status: " + xhr.status);
+					console.log("text status: " + textStatus);
+					console.log("error: " + err);
+				},
+				success: function() {
+					$('#search-results').html("<h2 class='text-center'>Song Added!</h2>");
+				}
+			});
+		}
 
-        function showMeWhatYouGot() {
-            $.ajax({
-                type: 'GET',
-                url: '/get_songs',
-                error: function(xhr, textStatus, err) {
-                    console.log("readyState: " + xhr.readyState);
-                    console.log("responseText: " + xhr.responseText);
-                    console.log("status: " + xhr.status);
-                    console.log("text status: " + textStatus);
-                    console.log("error: " + err);
-                },
-                success: function(body) {
-					console.log(body);
-                    var playing = body.playing;
-                    var queue = body.songs;
-					console.log(playing);
-					console.log(queue);
-                    if (queue.length > 0 || playing) {
-                        var html = "";
-                        if (playing != undefined && playing.name != undefined) {
-                            html +=
-                                "<h2 class='text-center'>Now playing</h2>\
+		function showMeWhatYouGot() {
+			$.ajax({
+				type: 'GET',
+				url: '/get_songs',
+				error: function(xhr, textStatus, err) {
+					console.log("readyState: " + xhr.readyState);
+					console.log("responseText: " + xhr.responseText);
+					console.log("status: " + xhr.status);
+					console.log("text status: " + textStatus);
+					console.log("error: " + err);
+				},
+				success: function(body) {
+					//console.log(body);
+					var playing = body.playing;
+					var queue = body.songs;
+					//console.log(playing);
+					//console.log(queue);
+					if (queue.length > 0 || playing) {
+						var html = "";
+						if (playing != undefined && playing.name != undefined) {
+							html +=
+								"<h2 class='text-center'>Now playing</h2>\
                                     <table style='width:100%'>\
                                         <tr>\
                                             <th style='width:30%'></th>\
@@ -416,110 +416,197 @@
                                             <th style='width:35%'>Artist</th>\
                                         </tr>\
                                         <tr>\
-                                            <td><img style='max-width: 100%' src=\"" + playing.album_art_url + "\"/></td>\
+                                            <td><img style='max-width: 100%' src=\"" +
+								playing.album_art_url + "\"/></td>\
                                             <td><h4>" + playing.name + "</h4></td>\
-                                            <td><h4>" + playing.artist + "</h4></td>\
+                                            <td><h4>" + playing.artist +
+								"</h4></td>\
                                         <tr>\
                                     </table>";
-                        }
-                        if (queue.length > 0) {
-                            html +=
-                                "<h2 class='text-center'>Coming up</h2>\
+						}
+						if (queue.length > 0) {
+							html +=
+								"<h2 class='text-center'>Coming up</h2>\
                                 <table style='width:100%'> \
                                     <tr>\
                                         <th style='width:30%'></th>\
                                         <th style='width:35%'>Song</th>\
                                         <th style='width:35%'>Artist</th>\
                                     </tr>";
-                            for (var i = 0; i < queue.length; i++) {
-                                var item = queue[i];
-                                html += "<tr>\
+							for (var i = 0; i < queue.length; i++) {
+								var item = queue[i];
+								html += "<tr>\
                                             <td><img style='max-width: 100%' src=\"" + item.album_art_url + "\"/></td>\
-                                            <td><h4>" + item.name + "</h4></td>\
+                                            <td><h4>" + item.name +
+									"</h4></td>\
                                              <td><h4>" + item.artist + "</h4></td>\
                                         </tr>";
-                            }
-                            html += "</table>";
-                        }
+							}
+							html += "</table>";
+						}
 
-                    } else {
-                        html = "<h2 class='text-center'>Hmmm... Nothing queued up.</h2>"
-                    }
+					} else {
+						html = "<h2 class='text-center'>Hmmm... Nothing queued up.</h2>"
+					}
 
-                    $('#search-results').html(html);
-                }
-            });
-            displayMode = setTimeout(showMeWhatYouGot, 2000);
-        }
+					$('#search-results').html(html);
+				}
+			});
+			displayMode = setTimeout(showMeWhatYouGot, 2000);
+		}
 
-        function getInfo() {
-            $.ajax({
-              type: "GET",
-              url: 'https://api.spotify.com/v1/me/player/devices',
-              headers: {
-                'Authorization': 'Bearer ' + access_token,
-                'Accept': 'application/json'
-              },
-              success: function(response) {
-                  console.log('Success');
-                  console.log(response);
-				  var html;
-				  if (response.devices.length != 0) {
-					  html =
-						  "<table style='width:100%' class='table-fill'> \
+		function getInfo() {
+			$.ajax({
+				type: "GET",
+				url: 'https://api.spotify.com/v1/me/player/devices',
+				headers: {
+					'Authorization': 'Bearer ' + access_token,
+					'Accept': 'application/json'
+				},
+				success: function(response) {
+					//console.log('Success');
+					//console.log(response);
+					var html;
+					if (response.devices.length != 0) {
+						html =
+							"<table style='width:100%' class='table-fill'> \
 							  <thead>\
 								  <th style='width:45%'>Device Name</th>\
 								  <th style='width:45%'>Device Type</th>\
 								  <th style='width:10%'>Use?</th>\
 							  </thead>";
-					  for (var i = 0; i < response.devices.length; i++) {
-						  var item = response.devices[i];
-						  html += "<tbody class='table-hover'>\
+						for (var i = 0; i < response.devices.length; i++) {
+							var item = response.devices[i];
+							html += "<tbody class='table-hover'>\
 									  <tr>" +
-										  "<td>" + item.name + "</td>\
+								"<td>" + item.name + "</td>\
 										  <td>" + item.type + "</td>\
 										  <td class='text-center'>" +
-											  "<button class='add-button' onclick=setDevice('" + item.id + "')>USE</button>\
+								"<button class='add-button' onclick=setDevice('" + item.id + "')>USE</button>\
 										  </td>\
 									  </tr>\
 								  </tbody>";
-					  }
-					  html += "</table>";
+						}
+						html += "</table>";
 
-				  } else {
-					  html = "<h3 class='text-center'>We couldn't find any devices...</h3>"
-				  }
-				  $('#search-results').html(html);
-              },
-              error: function(error) {
-                  console.log('Error');
-                  console.log(error);
-              }
-            });
-        }
+					} else {
+						html = "<h3 class='text-center'>We couldn't find any devices...</h3>"
+					}
+					$('#search-results').html(html);
+				},
+				error: function(error) {
+					console.log('Error');
+					console.log(error);
+				}
+			});
+		}
+
+		function getPlaylists() {
+			$.ajax({
+				type: "GET",
+				url: 'https://api.spotify.com/v1/me',
+				headers: {
+					'Authorization': 'Bearer ' + access_token,
+					'Accept': 'application/json'
+				},
+				success: function(response) {
+					//console.log(response);
+					var user_id = response.id;
+					$.ajax({
+						type: "GET",
+						url: 'https://api.spotify.com/v1/users/' + user_id + '/playlists',
+						headers: {
+							'Authorization': 'Bearer ' + access_token,
+							'Accept': 'application/json'
+						},
+						success: function(response) {
+							//console.log(response);
+							var html;
+							if (response.items.length > 0) {
+								html =
+									"<table style='width:100%' class='table-fill'> \
+	  							  <thead>\
+	  								  <th style='width:90%'>Playlist Name</th>\
+	  								  <th style='width:10%'>Use?</th>\
+	  							  </thead>";
+								for (var i = 0; i < response.items.length; i++) {
+									var item = response.items[i];
+									html += "<tbody class='table-hover'>\
+	  									  <tr>" +
+										"<td>" + item.name + "</td>\
+	  										  <td class='text-center'>" +
+										"<button class='add-button' onclick=usePlaylist('" + (item.id + "','" + user_id) +"')>USE</button>\
+	  										  </td>\
+	  									  </tr>\
+	  								  </tbody>";
+								}
+								html += "</table>";
+
+							} else {
+								html = "<h3 class='text-center'>We couldn't find any playlists...</h3>"
+							}
+							$('#search-results').html(html);
+						},
+						error: function(error) {
+							console.log('Error');
+							console.log(error);
+						}
+					});
+
+				},
+				error: function(error) {
+					console.log('Error');
+					console.log(error);
+				}
+			});
+		}
+
+		function usePlaylist(playlistID, userID) {
+			//console.log(playlistID, userID);
+
+			$.ajax({
+				type: 'POST',
+				data: JSON.stringify({
+					"playlistID": playlistID,
+					"userID": userID
+				}),
+				contentType: 'application/json',
+				url: '/setSongs',
+				error: function(xhr, textStatus, err) {
+					console.log("readyState: " + xhr.readyState);
+					console.log("responseText: " + xhr.responseText);
+					console.log("status: " + xhr.status);
+					console.log("text status: " + textStatus);
+					console.log("error: " + err);
+				},
+				success: function() {
+					$('#search-results').html("<h2 class='text-center'>Queue preloaded!</h2>");
+				}
+			});
+
+		}
 
 		function setDevice(device_id) {
 			$.ajax({
-                type: 'POST',
-                data: JSON.stringify({
-                    "device_id": device_id,
-                }),
-                contentType: 'application/json',
-                url: '/device',
-                error: function(xhr, textStatus, err) {
-                    console.log("readyState: " + xhr.readyState);
-                    console.log("responseText: " + xhr.responseText);
-                    console.log("status: " + xhr.status);
-                    console.log("text status: " + textStatus);
-                    console.log("error: " + err);
-                },
-                success: function() {
-                    $('#search-results').html("<h2 class='text-center'>Device Set!</h2>");
-                }
-            });
+				type: 'POST',
+				data: JSON.stringify({
+					"device_id": device_id,
+				}),
+				contentType: 'application/json',
+				url: '/device',
+				error: function(xhr, textStatus, err) {
+					console.log("readyState: " + xhr.readyState);
+					console.log("responseText: " + xhr.responseText);
+					console.log("status: " + xhr.status);
+					console.log("text status: " + textStatus);
+					console.log("error: " + err);
+				},
+				success: function() {
+					$('#search-results').html("<h2 class='text-center'>Device Set!</h2>");
+				}
+			});
 		}
-
-    </script>
+	</script>
 
 </head>
 
