@@ -175,7 +175,7 @@
 							<li>play a song through the spotify app (Sets a value on spotify side)</li>
 							<li>Use <button type="button" id="show-devices" onclick="getInfo()">Find Devices</button> to bring up your available devices.</li>
 							<li>Select the computer device that you played music on previously</li>
-							<li>Add songs via search, or preload the queue with up to 100 songs from one of <button type="button" id="show-devices" onclick="getPlaylists()">your playlists!</button></li>
+							<li>Add songs via search, or preload the queue with songs from one of <button type="button" id="show-devices" onclick="getPlaylists()">your playlists!</button></li>
 							<li>Your friends can connect to your session using your session key: <%= sessionKey %></li>
 						</ol>
 						<div class="input-group stylish-input-group">
@@ -315,7 +315,7 @@
 			clearTimeout(displayMode);
 
 			//setup the querystring
-			var query = "?q=" + params.replace(/ /g, '+') + "&type=track&markert=US&limit=5";
+			var query = "?q=" + params.replace(/ /g, '+') + "&type=track&markert=US&limit=10";
 
 			if (!params || 0 === params.length || !params.trim()) {
 				$('#search-results').html("<h2>Type something in the search box first.</h2>");
@@ -392,11 +392,7 @@
 				type: 'GET',
 				url: '/get_songs',
 				error: function(xhr, textStatus, err) {
-					console.log("readyState: " + xhr.readyState);
-					console.log("responseText: " + xhr.responseText);
-					console.log("status: " + xhr.status);
-					console.log("text status: " + textStatus);
-					console.log("error: " + err);
+					clearTimeout(displayMode);
 				},
 				success: function(body) {
 					//console.log(body);
@@ -573,11 +569,8 @@
 				contentType: 'application/json',
 				url: '/setSongs',
 				error: function(xhr, textStatus, err) {
-					console.log("readyState: " + xhr.readyState);
-					console.log("responseText: " + xhr.responseText);
-					console.log("status: " + xhr.status);
-					console.log("text status: " + textStatus);
-					console.log("error: " + err);
+					$('#search-results').html("<h2 class='text-center'>Could not use playlist.\
+					 Please try a different playlist or, did you set the device?</h2>");
 				},
 				success: function() {
 					$('#search-results').html("<h2 class='text-center'>Queue preloaded!</h2>");

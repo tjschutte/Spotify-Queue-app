@@ -8,14 +8,10 @@ const client_id = '124f0693c5084064ad7d8b4f1db5c55a'; // Your client id
 const client_secret = '8b6d017da5d5427ab77cffb4388cbff0'; // Your secret
 const redirect_uri = 'http://localhost:8888/create'; // Your redirect uri
 
-// The list of songs added. Eventuall will need to tie this to a session key
+// Holds state information about each queue
 var queues = queues || {};
+exports.queues = queues;
 
-var playing = playing || undefined;
-
-/**
- * GET. Login and redirect back to the search page.
- */
 exports.search = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 
@@ -28,9 +24,7 @@ exports.search = (req, res) => {
 };
 
 exports.findQueue = (req, res) => {
-	//console.log(req.body);
 	if (req.body.sessionKey in queues) {
-		//console.log('Found:', req.body.sessionKey);
 		res.send('FOUND');
 	} else {
 		res.send('NOT FOUND');
@@ -76,14 +70,17 @@ exports.create = (req, res) => {
                 var access_token = temp.access_token,
                     refresh_token = temp.refresh_token;
 
-				queues[sessionKey] = {};
-				queues[sessionKey]['key'] = sessionKey;
-				queues[sessionKey]['access_token'] = access_token;
-				queues[sessionKey]['songs'] = [];
-				queues[sessionKey]['playing'] = {};
-				queues[sessionKey]['sorted'] = true;
-				queues[sessionKey]['song_timer'] = undefined;
-				queues[sessionKey]['device_id'] = undefined;
+				queues[sessionKey] = {}; // Empty session state.  Should hold everything a session needs
+				queues[sessionKey]['key'] = sessionKey; // Corresponding key
+				queues[sessionKey]['access_token'] = access_token; // Premium account access_token
+				queues[sessionKey]['refresh_token'] = refresh_token; // Premium account refresh_token
+				queues[sessionKey]['refresh_count'] = 0; // Number of times tokens have been refreshed
+				queues[sessionKey]['refresh'] = setTimeout(refresh_tokens, (60000 * 55), sessionKey);
+				queues[sessionKey]['songs'] = []; // Songs in queue
+				queues[sessionKey]['playing'] = {}; // Currently playing song information
+				queues[sessionKey]['sorted'] = true; // If the song list has been sorted (by votes)
+				queues[sessionKey]['song_timer'] = undefined; // Timer till we push next song
+				queues[sessionKey]['device_id'] = undefined; // ID of playback device for this session
 
 				// Log sessions to the console.
 				console.log(queues);
@@ -113,7 +110,7 @@ exports.add = (req, res) => {
     var options = {
         url: 'https://api.spotify.com/v1/tracks/' + req.body.uri.split(':')[2],
         headers: {
-            'Authorization': 'Bearer ' + req.body.access_token
+            'Authorization': 'Bearer ' + queues[sessionKey]['access_token']
         },
         json: true
     };
@@ -127,13 +124,11 @@ exports.add = (req, res) => {
             "album_art_url": body.album.images[0].url,
 			"votes": 0
         }
-        // console.log(body);
-        // console.log(body.album.images);
 
         queues[sessionKey]['songs'].push(songInfo);
 
         res.render('search.html', {
-            access_token: req.body.access_token,
+            access_token: queues[sessionKey]['access_token'],
             song_list: JSON.stringify(queues[sessionKey]['songs']),
 			sessionKey: sessionKey
         });
@@ -143,8 +138,8 @@ exports.add = (req, res) => {
 exports.get_songs = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 
-	if (sessionKey == 'No key' || queues[sessionKey] == undefined) {
-		res.sendStatus(400);
+	if (sessionKey == 'No key' || queues[sessionKey] == undefined || queues[sessionKey]['sorted'] == undefined) {
+			res.sendStatus(400);
 	}
 
 	// Songs are not sorted, sort then go
@@ -172,10 +167,12 @@ exports.get_songs = (req, res) => {
 
 exports.set_songs = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
-	//console.log(req.body.userID, req.body.playlistID);
+	var playlistLength;
+	var offset = req.body.offset || 0;
+	req.body.offset = offset;
 
 	var options = {
-        url: 'https://api.spotify.com/v1/users/' + req.body.userID + '/playlists/' + req.body.playlistID + '/tracks',
+        url: 'https://api.spotify.com/v1/users/' + req.body.userID + '/playlists/' + req.body.playlistID + '/tracks?offset=' + offset,
         headers: {
             'Authorization': 'Bearer ' + queues[sessionKey]['access_token']
         },
@@ -183,24 +180,79 @@ exports.set_songs = (req, res) => {
     };
 
     request.get(options, function(error, response, body) {
-		//console.log(body);
-		for (var i = 0; i < body.items.length; i++) {
-			var track = body.items[i].track;
-			var songInfo = {
-				"uri": track.uri,
-				"name": track.name,
-				"artist": track.artists[0].name,
-				"duration_ms": track.duration_ms,
-				"album_art_url": track.album.images[0].url,
-				"votes": 0
-			}
+		if (body.items != undefined) {
+			playlistLength = body.total;
+			for (var i = 0; i < body.items.length; i++) {
+				var track = body.items[i].track;
+				var songInfo = {
+					"uri": track.uri,
+					"name": track.name,
+					"artist": track.artists[0].name,
+					"duration_ms": track.duration_ms,
+					"album_art_url": track.album.images[0].url,
+					"votes": 0
+				}
 
-			queues[sessionKey]['songs'].push(songInfo);
+				queues[sessionKey]['songs'].push(songInfo);
+			}
+		} else {
+			console.log(error, response);
+			res.sendStatus(400);
+		}
+
+		if (playlistLength > 100 && offset < (playlistLength - 100)) {
+			req.body.offset += 100;
+			module.exports.set_songs(req, res);
+		} else {
+			res.sendStatus(200);
 		}
 	});
-
-	res.sendStatus(200);
 };
+
+function refresh_tokens(sessionKey) {
+	console.log('Access Token:', queues[sessionKey]['access_token']);
+	console.log('Refresh Token:', queues[sessionKey]['refresh_token']);
+
+	queues[sessionKey]['refresh'] = setTimeout(refresh_tokens, (60000 * 55), sessionKey);
+
+	var refresh_token = queues[sessionKey]['refresh_token'];
+	queues[sessionKey]['refresh_count']++;
+
+	// If session is more than 3 hours old... kill it. They have had enough.
+	if (queues[sessionKey]['refresh_count'] > 3) {
+		queues[sessionKey] = {};
+	}
+
+    var authOptions = {
+        url: 'https://accounts.spotify.com/api/token',
+        headers: {
+            'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
+        },
+        form: {
+            grant_type: 'refresh_token',
+            refresh_token: refresh_token
+        },
+        json: true
+    };
+    request.post(authOptions, function(error, response, body) {
+        if (!error && response.statusCode === 200) {
+            queues[sessionKey]['access_token'] = body.access_token;
+			console.log('Access Token:', queues[sessionKey]['access_token']);
+			console.log('Refresh Token:', queues[sessionKey]['refresh_token']);
+        } else {
+			console.log(error);
+		}
+    });
+};
+
+exports.get_tokens = (req, res) => {
+		var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
+		var body = {
+	        'access_token' : queues[sessionKey]['access_token'],
+	        'refresh_token': queues[sessionKey]['refresh_token']
+	    }
+	    res.send(body);
+}
 
 function playNext(sessionKey) {
 
@@ -208,7 +260,6 @@ function playNext(sessionKey) {
     	clearTimeout(queues[sessionKey]['song_timer']);
 	}
 
-	// Songs are not sorted, sort then go
 	if (!queues[sessionKey]['sorted']) {
 		queues[sessionKey]['songs'].sort(function(a, b) {
 			return b.votes - a.votes;
@@ -222,13 +273,25 @@ function playNext(sessionKey) {
 
         queues[sessionKey]['playing'] = queues[sessionKey]['songs'].shift();
         var length_ms = queues[sessionKey]['playing']['duration_ms'];
-        //console.log("Now playing:", playing);
-        //console.log("Songs left in playlist:", songs['songs'].length);
 
-        cmd_String = "curl -v -XPUT -H 'Authorization: Bearer " + access_token +
-            "' -H 'Content-type: application/json' -d '{\"device_id\": \"" + queues[sessionKey]['device_id'] + "\",\"uris\":[\"" + queues[sessionKey]['playing']['uri'] +"\"]}' \'https://api.spotify.com/v1/me/player/play\'";
-        //console.log(cmd_String);
-        cmd.run(cmd_String);
+        cmd_String = "curl -v -XPUT -i -H 'Authorization: Bearer " + access_token +
+            "' -H 'Content-type: application/json' -H 'Connection: close' -d '{\"device_id\": \"" + queues[sessionKey]['device_id'] + "\",\"uris\":[\"" + queues[sessionKey]['playing']['uri'] +"\"]}' \'https://api.spotify.com/v1/me/player/play\'";
+
+		// Run the command. If it fails attempt to resolve and try again.
+		var retry = false;
+		do {
+			cmd.get(cmd_String, function(err, data, stderr) {
+				retry = false;
+				var status_code = data.split(' ')[1];
+				console.log(status_code);
+				// if the session token is stale, get a new one
+				if (status_code == '401') {
+					refresh_tokens(sessionKey);
+					retry = true;
+					console.log(err, data, stderr);
+				}
+			});
+		} while (retry);
 
         queues[sessionKey]['song_timer'] = setTimeout(playNext, length_ms, sessionKey);
 
@@ -239,7 +302,7 @@ function playNext(sessionKey) {
 
 exports.play = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
-	//console.log(sessionKey);
+
 	if (queues[sessionKey]['song_timer'] != undefined) {
     	clearTimeout(queues[sessionKey]['song_timer']);
 	}
@@ -247,13 +310,25 @@ exports.play = (req, res) => {
     if (queues[sessionKey]['songs'].length != 0) {
         queues[sessionKey]['playing'] = queues[sessionKey]['songs'].shift();
         var length_ms = queues[sessionKey]['playing']['duration_ms'];
-        //console.log("Now playing:", queues[sessionKey]['playing']);
-        //console.log("Songs left in playlist:", queues[sessionKey]['songs'].length);
 
-        cmd_String = "curl -v -XPUT -H 'Authorization: Bearer " + req.body.access_token +
-            "' -H 'Content-type: application/json' -d '{\"device_id\": \"" + queues[sessionKey]['device_id'] + "\",\"uris\":[\"" + queues[sessionKey]['playing']['uri'] +"\"]}' \'https://api.spotify.com/v1/me/player/play\'";
+        cmd_String = "curl -v -XPUT -i -H 'Authorization: Bearer " + req.body.access_token +
+            "' -H 'Content-type: application/json' -H 'Connection: close' -d '{\"device_id\": \"" + queues[sessionKey]['device_id'] + "\",\"uris\":[\"" + queues[sessionKey]['playing']['uri'] +"\"]}' \'https://api.spotify.com/v1/me/player/play\'";
 
-        cmd.run(cmd_String);
+		// Run the command. If it fails attempt to resolve and try again.
+		var retry = false;
+		do {
+	        cmd.get(cmd_String, function(err, data, stderr) {
+				retry = false;
+				var status_code = data.split(' ')[1];
+				console.log(status_code);
+				// if the session token is stale, get a new one
+				if (status_code == '401') {
+					refresh_tokens(sessionKey);
+					retry = true;
+					console.log(err, data, stderr);
+				}
+			});
+		} while (retry);
 
         queues[sessionKey]['song_timer'] = setTimeout(playNext, length_ms, sessionKey);
 
@@ -266,21 +341,17 @@ exports.play = (req, res) => {
 exports.setDevice = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 	queues[sessionKey]['device_id'] = req.body.device_id;
-	console.log('device id set to', req.body.device_id);
 	res.sendStatus(200);
 };
 
 exports.upvote = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 	queues[sessionKey]['sorted'] = false;
-	//console.log("up-voted song was: ", req.body.uri);
-	//console.log(sessionKey);
+
 	var uri = req.body.uri;
 	for (var i = 0; i < queues[sessionKey]['songs'].length; i++) {
-		//console.log(queues[sessionKey]['songs'][i]);
 		if (queues[sessionKey]['songs'][i]['uri'] == uri) {
 			queues[sessionKey]['songs'][i]['votes']++;
-			//console.log(queues[sessionKey]['songs'][i]['name'], "at", queues[sessionKey]['songs'][i]['votes'])
 		}
 	}
 	res.sendStatus(200);
@@ -289,14 +360,11 @@ exports.upvote = (req, res) => {
 exports.downvote = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 	queues[sessionKey]['sorted'] = false;
-	//console.log("down-voted song was: ", req.body.uri);
-	//console.log(sessionKey);
+
 	var uri = req.body.uri;
 	for (var i = 0; i < queues[sessionKey]['songs'].length; i++) {
-		//console.log(queues[sessionKey]['songs'][i]);
 		if (queues[sessionKey]['songs'][i]['uri'] == uri) {
 			queues[sessionKey]['songs'][i]['votes']--;
-			//console.log(queues[sessionKey]['songs'][i]['name'], "at", queues[sessionKey]['songs'][i]['votes'])
 		}
 	}
 	res.sendStatus(200);
@@ -306,6 +374,10 @@ exports.join = (req, res) => {
     res.render('join.html');
 };
 
- exports.setup = (req,res) => {
+exports.setup = (req,res) => {
     res.render('setup.html');
 };
+
+exports.capacity = (req, res) => {
+	res.render('capacity.html');
+}

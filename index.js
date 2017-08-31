@@ -23,6 +23,7 @@ const utils = require('./utils/utilities');
 // auth state
 var stateKey = 'spotify_auth_state';
 var sessionKey = 'sessionKey';
+const numSessions = 1000;
 
 /**
  * Create Express server.
@@ -58,6 +59,7 @@ app.get('/', controller.setup);
 app.get('/search', controller.search);
 app.get('/join', controller.join);
 app.get('/create', controller.create);
+app.get('/capacity', controller.capacity);
 
 // Control routes
 app.post('/add', controller.add);
@@ -68,13 +70,22 @@ app.post('/device', controller.setDevice);
 app.post('/upvote', controller.upvote);
 app.post('/downvote', controller.downvote);
 app.post('/setSongs', controller.set_songs);
+app.get('/get_tokens', controller.get_tokens);
 
 // Redirect to login to spotify (gets us a key to use when searching)
 // Will also use the key when we want to connect to a use device for whoever does the
 // initial setup
 app.get('/setup', function(req, res) {
     var state = utils.randString(16);
-	var key = utils.randSessionKey();
+	var keyTry = 0;
+	do {
+		var key = utils.randSessionKey();
+		keyTry++;
+	} while (key in controller.queues && keyTry <= numSessions);
+	if (keyTry >= numSessions) {
+		res.redirect('/capacity');
+		return;
+	}
     res.cookie(stateKey, state);
 	res.cookie(sessionKey, key);
     // your application requests authorization

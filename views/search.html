@@ -258,7 +258,7 @@
             }
 
             // setup the querystring (remove spaces)
-            var query = "?q=" + params.replace(/ /g, '+') + "&type=track&markert=US&limit=5";
+            var query = "?q=" + params.replace(/ /g, '+') + "&type=track&markert=US&limit=10";
 
             if (!params || 0 === params.length || !params.trim()) {
                 $('#search-results').html("<h2>Type something in the search box first.</h2>");
@@ -335,11 +335,7 @@
                 type: 'GET',
                 url: '/get_songs',
                 error: function(xhr, textStatus, err) {
-                    console.log("readyState: " + xhr.readyState);
-                    console.log("responseText: " + xhr.responseText);
-                    console.log("status: " + xhr.status);
-                    console.log("text status: " + textStatus);
-                    console.log("error: " + err);
+                    clearTimeout(displayMode);
                 },
                 success: function(body) {
 					console.log(body);
@@ -406,8 +402,6 @@
         }
 
 		function tryUpvote(uri) {
-			//console.log('You attempted to up-vote: ' + uri);
-
 			$.ajax({
                 type: 'POST',
                 data: JSON.stringify({
@@ -430,8 +424,6 @@
 		}
 
 		function tryDownvote(uri) {
-			//console.log('You attempted to down-vote: ' + uri);
-
 			$.ajax({
                 type: 'POST',
                 data: JSON.stringify({
