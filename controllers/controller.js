@@ -2,11 +2,12 @@ const querystring = require('querystring');
 const cookieParser = require('cookie-parser');
 const request = require('request'); // "Request" library
 const cmd = require('node-cmd');
+const config = require('../config.json');
 
 // Application specific stuff. From https://developer.spotify.com/
-const client_id = '124f0693c5084064ad7d8b4f1db5c55a'; // Your client id
-const client_secret = '8b6d017da5d5427ab77cffb4388cbff0'; // Your secret
-const redirect_uri = 'http://192.168.1.105:8888/create'; // Your redirect uri
+const client_id = config.client_id; // Your client id
+const client_secret = config.client_secret; // Your secret
+const redirect_uri = config.redirect_uri; // Your redirect uri
 
 const miliseconds_in_minute = 60000;
 const refresh_wait = 55;
@@ -212,6 +213,22 @@ exports.set_songs = (req, res) => {
 		}
 	});
 };
+
+exports.end = (req, res) => {
+	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
+	if (queues[sessionKey] != undefined) {
+
+		try {
+			console.log('Expiring session:', sessionKey);
+			console.log('Clearing timeout...');
+			clearTimeout(queues[sessionKey]['refresh']);
+			console.log('Removing Queue...');
+			delete queues[sessionKey];
+		} catch (TypeError) {  }
+
+	}
+	res.sendStatus(200);
+}
 
 function refresh_tokens(sessionKey) {
 	if (queues[sessionKey] == undefined) {

@@ -57,7 +57,7 @@
 				console.log(response);
 				if (response == 'FOUND') {
 					document.cookie = "sessionKey=" + param;
-					window.location.href = "/search"
+					window.location.href = "/search";
 				} else {
 					$('#info-zone').html("Could not find session: " + param);
 				}

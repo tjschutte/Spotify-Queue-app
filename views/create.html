@@ -59,6 +59,11 @@
 			});
 		});
 
+		window.onbeforeunload = function(event) {
+			alert('Please use the "!end" commands before leaving to close your session');
+	    	end();
+		};
+
 		var access_token = "<%= access_token %>";
 		var sessionKey = "<%= sessionKey %>";
 		var displayMode;
@@ -108,7 +113,8 @@
 				!play - plays the playlist</br>\
 				!skip - skip the playing song</br>\
 				!showkey - show your session key so others may join</br>\
-				!playlists - displays your playlists, you use them to preload the queue\
+				!playlists - displays your playlists, you use them to preload the queue</br>\
+				!end - ends your session (do this before you leave or you may have issues if you try starting a new queue before 6 hours are up!)</br>\
 				!commands - show this help messege</br>\
 				</h3>"
 			);
@@ -118,28 +124,22 @@
 			var cmd = commandString.substring(1).toLowerCase();
 			switch (cmd) {
 				case "play":
-				case "play()":
 					play();
 					break;
 				case "skip":
-				case "skip()":
 					play();
 					break;
 				case "display":
-				case "display()":
 					display();
 					break;
-				case "stop":
-				case "stop()":
-					console.log("Doesnt exist yet...");
-					break;
 				case "showkey":
-				case "showkey()":
 					showKey();
 					break;
 				case "playlists":
-				case "playlists()":
 					getPlaylists();
+					break;
+				case "end":
+					end();
 					break;
 				case "commands":
 				case "commands()":
@@ -151,6 +151,27 @@
 					" + cmd + "' use '!commands' for help</h3>");
 					break;
 			}
+		}
+
+		function end() {
+			console.log('Ending session...');
+			$.ajax({
+				type: 'POST',
+				contentType: 'application/json',
+				url: '/end',
+				error: function(xhr, textStatus, err) {
+					console.log("readyState: " + xhr.readyState);
+					console.log("responseText: " + xhr.responseText);
+					console.log("status: " + xhr.status);
+					console.log("text status: " + textStatus);
+					console.log("error: " + err);
+				},
+				success: function(response) {
+					console.log("Session Ended. Returning to index");
+					console.log(response);
+					window.location.href = "/";
+				}
+			});
 		}
 
 		function search() {

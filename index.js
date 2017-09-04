@@ -8,11 +8,12 @@ const cookieParser = require('cookie-parser');
 const request = require('request'); // "Request" library
 const path = require('path');
 const fs = require('fs');
+const config = require('./config.json');
 
 // Application specific stuff. From https://developer.spotify.com/
-const client_id = '124f0693c5084064ad7d8b4f1db5c55a'; // Your client id
-const client_secret = '8b6d017da5d5427ab77cffb4388cbff0'; // Your secret
-const redirect_uri = 'http://192.168.1.105:8888/create'; // Your redirect uri
+const client_id = config.client_id; // Your client id
+const client_secret = config.client_secret; // Your secret
+const redirect_uri = config.redirect_uri; // Your redirect uri
 
 /**
  * Controllers (route handlers).
@@ -63,13 +64,14 @@ app.get('/capacity', controller.capacity);
 
 // Control routes
 app.post('/add', controller.add);
-app.get('/get_songs', controller.get_songs);
+app.post('/end', controller.end);
 app.post('/play', controller.play);
 app.post('/find', controller.findQueue);
 app.post('/device', controller.setDevice);
 app.post('/upvote', controller.upvote);
 app.post('/downvote', controller.downvote);
 app.post('/setSongs', controller.set_songs);
+app.get('/get_songs', controller.get_songs);
 app.get('/get_tokens', controller.get_tokens);
 
 // Redirect to login to spotify (gets us a key to use when searching)
