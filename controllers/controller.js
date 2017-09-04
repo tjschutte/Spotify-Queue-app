@@ -6,7 +6,10 @@ const cmd = require('node-cmd');
 // Application specific stuff. From https://developer.spotify.com/
 const client_id = '124f0693c5084064ad7d8b4f1db5c55a'; // Your client id
 const client_secret = '8b6d017da5d5427ab77cffb4388cbff0'; // Your secret
-const redirect_uri = 'http://localhost:8888/create'; // Your redirect uri
+const redirect_uri = 'http://192.168.1.105:8888/create'; // Your redirect uri
+
+const miliseconds_in_minute = 60000;
+const refresh_wait = 55;
 
 // Holds state information about each queue
 var queues = queues || {};
@@ -75,7 +78,8 @@ exports.create = (req, res) => {
 				queues[sessionKey]['access_token'] = access_token; // Premium account access_token
 				queues[sessionKey]['refresh_token'] = refresh_token; // Premium account refresh_token
 				queues[sessionKey]['refresh_count'] = 0; // Number of times tokens have been refreshed
-				queues[sessionKey]['refresh'] = setTimeout(refresh_tokens, (60000 * 55), sessionKey);
+				// Keep the session alive. Refresh every 55 minutes (keys expire after 1 hour)
+				queues[sessionKey]['refresh'] = setTimeout(refresh_tokens, (miliseconds_in_minute * refresh_wait), sessionKey);
 				queues[sessionKey]['songs'] = []; // Songs in queue
 				queues[sessionKey]['playing'] = {}; // Currently playing song information
 				queues[sessionKey]['sorted'] = true; // If the song list has been sorted (by votes)
@@ -210,18 +214,21 @@ exports.set_songs = (req, res) => {
 };
 
 function refresh_tokens(sessionKey) {
-	console.log('Access Token:', queues[sessionKey]['access_token']);
-	console.log('Refresh Token:', queues[sessionKey]['refresh_token']);
-
-	queues[sessionKey]['refresh'] = setTimeout(refresh_tokens, (60000 * 55), sessionKey);
-
-	var refresh_token = queues[sessionKey]['refresh_token'];
-	queues[sessionKey]['refresh_count']++;
+	if (queues[sessionKey] == undefined) {
+		return;
+	}
 
 	// If session is more than 3 hours old... kill it. They have had enough.
-	if (queues[sessionKey]['refresh_count'] > 3) {
-		queues[sessionKey] = {};
+	if (queues[sessionKey]['refresh_count'] > 5) {
+		console.log('Expiring session:', sessionKey);
+		delete queues[sessionKey];
+		console.log(queues);
+		return;
 	}
+
+	queues[sessionKey]['refresh'] = setTimeout(refresh_tokens, (miliseconds_in_minute * refresh_wait), sessionKey);
+	var refresh_token = queues[sessionKey]['refresh_token'];
+	queues[sessionKey]['refresh_count']++;
 
     var authOptions = {
         url: 'https://accounts.spotify.com/api/token',
@@ -237,8 +244,6 @@ function refresh_tokens(sessionKey) {
     request.post(authOptions, function(error, response, body) {
         if (!error && response.statusCode === 200) {
             queues[sessionKey]['access_token'] = body.access_token;
-			console.log('Access Token:', queues[sessionKey]['access_token']);
-			console.log('Refresh Token:', queues[sessionKey]['refresh_token']);
         } else {
 			console.log(error);
 		}
@@ -249,7 +254,8 @@ exports.get_tokens = (req, res) => {
 		var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 		var body = {
 	        'access_token' : queues[sessionKey]['access_token'],
-	        'refresh_token': queues[sessionKey]['refresh_token']
+	        'refresh_token': queues[sessionKey]['refresh_token'],
+			'sessionKey'   : sessionKey
 	    }
 	    res.send(body);
 }
@@ -283,7 +289,6 @@ function playNext(sessionKey) {
 			cmd.get(cmd_String, function(err, data, stderr) {
 				retry = false;
 				var status_code = data.split(' ')[1];
-				console.log(status_code);
 				// if the session token is stale, get a new one
 				if (status_code == '401') {
 					refresh_tokens(sessionKey);
@@ -320,7 +325,6 @@ exports.play = (req, res) => {
 	        cmd.get(cmd_String, function(err, data, stderr) {
 				retry = false;
 				var status_code = data.split(' ')[1];
-				console.log(status_code);
 				// if the session token is stale, get a new one
 				if (status_code == '401') {
 					refresh_tokens(sessionKey);

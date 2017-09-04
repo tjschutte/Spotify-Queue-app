@@ -6,157 +6,8 @@
 	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-	<style type="text/css">
-		.stylish-input-group .input-group-addon {
-			background: white !important;
-		}
+	<link rel="stylesheet" type="text/css" href="css/common.css">
 
-		.stylish-input-group .form-control {
-			border-right: 0;
-			box-shadow: 0 0 0;
-			border-color: #ccc;
-		}
-
-		.stylish-input-group button {
-			border: 0;
-			background: transparent;
-		}
-
-		.vertical-center {
-			min-height: 100%;
-			/* Fallback for browsers do NOT support vh unit */
-			min-height: 100vh;
-			display: flex;
-			align-items: center;
-		}
-
-		.add-button {
-			background-color: #4CAF50;
-			/* Green */
-			border: none;
-			color: white;
-			padding: 10px 15px 10px 15px;
-			text-align: center;
-			text-decoration: none;
-			display: inline-block;
-			font-size: 14px;
-		}
-		/*** Table Styles **/
-
-		.table-fill {
-			background: #444444;
-			border-radius: 3px;
-			border-collapse: collapse;
-			height: 320px;
-			margin: auto;
-			max-width: 600px;
-			padding: 5px;
-			width: 100%;
-			box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-			animation: float 5s infinite;
-		}
-
-		th {
-			color: #D5DDE5;
-			background: #1b1e24;
-			border-bottom: 4px solid #9ea7af;
-			border-right: 1px solid #343a45;
-			font-size: 16px;
-			font-weight: 100;
-			padding: 16px;
-			text-align: left;
-			text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-			vertical-align: middle;
-		}
-
-		th:first-child {
-			border-top-left-radius: 3px;
-		}
-
-		th:last-child {
-			border-top-right-radius: 3px;
-			border-right: none;
-		}
-
-		tr {
-			border-top: 1px solid #C1C3D1;
-			border-bottom: 1px solid #C1C3D1;
-			color: #666B85;
-			font-size: 16px;
-			font-weight: normal;
-			text-shadow: 0 1px 1px rgba(256, 256, 256, 0.1);
-		}
-
-		tr:hover td {
-			background: #4E5066;
-			color: #FFFFFF;
-			border-top: 1px solid #22262e;
-			border-bottom: 1px solid #22262e;
-		}
-
-		tr:first-child {
-			border-top: none;
-		}
-
-		tr:last-child {
-			border-bottom: none;
-		}
-
-		tr:nth-child(odd) td {
-			background: #EBEBEB;
-		}
-
-		tr:nth-child(odd):hover td {
-			background: #4E5066;
-		}
-
-		tr:last-child td:first-child {
-			border-bottom-left-radius: 3px;
-		}
-
-		tr:last-child td:last-child {
-			border-bottom-right-radius: 3px;
-		}
-
-		td {
-			background: #FFFFFF;
-			padding: 8px;
-			text-align: left;
-			vertical-align: middle;
-			font-weight: 200;
-			font-size: 12px;
-			text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
-			border-right: 1px solid #C1C3D1;
-		}
-
-		td:last-child {
-			border-right: 0px;
-		}
-
-		th.text-left {
-			text-align: left;
-		}
-
-		th.text-center {
-			text-align: center;
-		}
-
-		th.text-right {
-			text-align: right;
-		}
-
-		td.text-left {
-			text-align: left;
-		}
-
-		td.text-center {
-			text-align: center;
-		}
-
-		td.text-right {
-			text-align: right;
-		}
-	</style>
 	<div class="vertical-center" id="page">
 		<div class="container">
 			<div class="row">
@@ -167,9 +18,9 @@
 							<b>DO NOT REFRESH THIS PAGE, YOUR SESSION WILL BE LOST.</b></br>
 							<b>DO NOT USE YOUR SPOTIFY APP TO CONTROL MUSIC OTHER THAN VOLUME.</b>
 						</p>
-						<h4>
+						<p>
 							Setup:
-						</h4>
+						<p>
 						<ol>
 							<li>Open spotify on the computer you wish to play music through.</li>
 							<li>play a song through the spotify app (Sets a value on spotify side)</li>
@@ -179,7 +30,7 @@
 							<li>Your friends can connect to your session using your session key: <%= sessionKey %></li>
 						</ol>
 						<div class="input-group stylish-input-group">
-							<input type="text" class="form-control" placeholder="Search... '!commands' for help" id="search-text-box">
+							<input type="text" class="form-control button-text" placeholder="Search... '!commands' for help" id="search-text-box">
 							<span class="input-group-addon" id="search-button">
                                 <button onclick="search()">
                                     <span class="glyphicon glyphicon-search"></span>
@@ -213,6 +64,8 @@
 		var displayMode;
 
 		function showKey() {
+			// Cancel displayMode
+			clearTimeout(displayMode);
 			$('#search-results').html("<h3 class='text-center'>Your session key is: " + sessionKey + "</h3>");
 		}
 
@@ -301,9 +154,9 @@
 		}
 
 		function search() {
-			// Get the search terms
+
+			clearTimeout(displayMode);
 			var params = $('#search-text-box').val();
-			// clear the text box
 			$('#search-text-box').val("");
 
 			if (params.charAt() === "!") {
@@ -311,10 +164,6 @@
 				return;
 			}
 
-			// Cancel displayMode
-			clearTimeout(displayMode);
-
-			//setup the querystring
 			var query = "?q=" + params.replace(/ /g, '+') + "&type=track&markert=US&limit=10";
 
 			if (!params || 0 === params.length || !params.trim()) {
@@ -395,11 +244,9 @@
 					clearTimeout(displayMode);
 				},
 				success: function(body) {
-					//console.log(body);
 					var playing = body.playing;
 					var queue = body.songs;
-					//console.log(playing);
-					//console.log(queue);
+
 					if (queue.length > 0 || playing) {
 						var html = "";
 						if (playing != undefined && playing.name != undefined) {
@@ -452,6 +299,8 @@
 		}
 
 		function getInfo() {
+			// Cancel displayMode
+			clearTimeout(displayMode);
 			$.ajax({
 				type: "GET",
 				url: 'https://api.spotify.com/v1/me/player/devices',
@@ -498,6 +347,8 @@
 		}
 
 		function getPlaylists() {
+			// Cancel displayMode
+			clearTimeout(displayMode);
 			$.ajax({
 				type: "GET",
 				url: 'https://api.spotify.com/v1/me',
@@ -558,8 +409,6 @@
 		}
 
 		function usePlaylist(playlistID, userID) {
-			//console.log(playlistID, userID);
-
 			$.ajax({
 				type: 'POST',
 				data: JSON.stringify({
@@ -596,6 +445,24 @@
 				},
 				success: function() {
 					$('#search-results').html("<h2 class='text-center'>Device Set!</h2>");
+				}
+			});
+		}
+
+		function get_tokens() {
+			$.ajax({
+				type: 'get',
+				contentType: 'application/json',
+				url: '/get_tokens',
+				error: function(xhr, textStatus, err) {
+					console.log("readyState: " + xhr.readyState);
+					console.log("responseText: " + xhr.responseText);
+					console.log("status: " + xhr.status);
+					console.log("text status: " + textStatus);
+					console.log("error: " + err);
+				},
+				success: function(response) {
+					access_token = response.access_token;
 				}
 			});
 		}

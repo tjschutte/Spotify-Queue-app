@@ -12,7 +12,7 @@ const fs = require('fs');
 // Application specific stuff. From https://developer.spotify.com/
 const client_id = '124f0693c5084064ad7d8b4f1db5c55a'; // Your client id
 const client_secret = '8b6d017da5d5427ab77cffb4388cbff0'; // Your secret
-const redirect_uri = 'http://localhost:8888/create'; // Your redirect uri
+const redirect_uri = 'http://192.168.1.105:8888/create'; // Your redirect uri
 
 /**
  * Controllers (route handlers).
@@ -82,6 +82,7 @@ app.get('/setup', function(req, res) {
 		var key = utils.randSessionKey();
 		keyTry++;
 	} while (key in controller.queues && keyTry <= numSessions);
+
 	if (keyTry >= numSessions) {
 		res.redirect('/capacity');
 		return;

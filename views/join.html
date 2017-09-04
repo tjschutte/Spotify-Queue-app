@@ -6,38 +6,16 @@
 	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-	<style type="text/css">
-		.stylish-input-group .input-group-addon {
-			background: white !important;
-		}
+	<link rel="stylesheet" type="text/css" href="css/common.css">
 
-		.stylish-input-group .form-control {
-			border-right: 0;
-			box-shadow: 0 0 0;
-			border-color: #ccc;
-		}
-
-		.stylish-input-group button {
-			border: 0;
-			background: transparent;
-		}
-
-		.vertical-center {
-			min-height: 100%;
-			/* Fallback for browsers do NOT support vh unit */
-			min-height: 100vh;
-			display: flex;
-			align-items: center;
-		}
-	</style>
 	<div class="vertical-center" id="page">
 		<div class="container">
 			<div class="row">
-				<div class="col-sm-6 col-sm-offset-3">
+				<div class="col-md-8 col-md-offset-2">
 					<div id="imaginary_container">
 						<h2>Search for your queue</h2>
 						<div class="input-group stylish-input-group">
-							<input type="number" class="form-control" placeholder="Enter the ID for your queue to join" id="search-text-box">
+							<input type="text" class="form-control button-text" placeholder="Enter the ID for your queue to join" id="search-text-box">
 							<span class="input-group-addon" id="search-button">
                                 <button onclick="searchQueues()">
                                     <span class="glyphicon glyphicon-search"></span>

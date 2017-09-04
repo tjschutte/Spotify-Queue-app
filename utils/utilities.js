@@ -17,10 +17,17 @@ exports.randString = generateRandomString = function(length) {
 
 exports.randSessionKey = genRandSessionKey = function() {
 	var key = '';
-    var possible = '0123456789';
+    const possibleNum = '0123456789';
+	const possibleChar = 'abcdefghijklmnopqrstuvwxyz';
 
     for (var i = 0; i < 3; i++) {
-        key += possible.charAt(Math.floor(Math.random() * possible.length));
+        key += possibleNum.charAt(Math.floor(Math.random() * possibleNum.length));
+    }
+
+	key+= '-';
+
+	for (var i = 0; i < 3; i++) {
+        key += possibleChar.charAt(Math.floor(Math.random() * possibleChar.length));
     }
     return key;
 }
