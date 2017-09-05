@@ -279,8 +279,10 @@ exports.get_tokens = (req, res) => {
 
 function playNext(sessionKey) {
 
-	if (queues[sessionKey]['song_timer'] != undefined) {
-    	clearTimeout(queues[sessionKey]['song_timer']);
+	try {
+		clearTimeout(queues[sessionKey]['song_timer']);
+	} catch (TypeError) {
+		return;
 	}
 
 	if (!queues[sessionKey]['sorted']) {
