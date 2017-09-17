@@ -19,6 +19,11 @@ exports.queues = queues;
 exports.search = (req, res) => {
 	var sessionKey = req.cookies ? req.cookies['sessionKey'] : 'No key';
 
+	if (sessionKey == undefined || sessionKey == 'No key' || queues[sessionKey] == undefined){
+		res.render('error.html');
+		return;
+	}
+
     res.render('search.html', {
         access_token: queues[sessionKey]['access_token'],
         song_list: JSON.stringify( queues[sessionKey]['songs']),
