@@ -26,7 +26,7 @@ exports.search = (req, res) => {
 
     res.render('search.html', {
         access_token: queues[sessionKey]['access_token'],
-        song_list: JSON.stringify( queues[sessionKey]['songs']),
+        song_list: JSON.stringify( queues[sessionKey]['queue']),
 		sessionKey: sessionKey
     });
 
@@ -86,11 +86,17 @@ exports.create = (req, res) => {
 				queues[sessionKey]['refresh_count'] = 0; // Number of times tokens have been refreshed
 				// Keep the session alive. Refresh every 55 minutes (keys expire after 1 hour)
 				queues[sessionKey]['refresh'] = setTimeout(refresh_tokens, (miliseconds_in_minute * refresh_wait), sessionKey);
-				queues[sessionKey]['songs'] = []; // Songs in queue
+				queues[sessionKey]['queue'] = []; // Songs in queue
 				queues[sessionKey]['playing'] = {}; // Currently playing song information
+				// TODO: Command to show already played songs
+				queues[sessionKey]['played'] = []; // Songs that have already been played
+				// TODO: Command to show skipped songs
+				queues[sessionKey]['skipped'] = []; // Songs that were skipped
 				queues[sessionKey]['sorted'] = true; // If the song list has been sorted (by votes)
 				queues[sessionKey]['song_timer'] = undefined; // Timer till we push next song
 				queues[sessionKey]['device_id'] = undefined; // ID of playback device for this session
+				// TODO: implement the repeats feature
+				queues[sessionKey]['repeats'] = true; // Allow repeat songs (Songs that have already beed added / played)
 
 				// Log sessions to the console.
 				console.log(queues);
@@ -99,7 +105,7 @@ exports.create = (req, res) => {
                 // this is so the page renders?
                 res.render('create.html', {
                     access_token: access_token,
-                    song_list: JSON.stringify(queues[sessionKey]['songs']),
+                    song_list: JSON.stringify(queues[sessionKey]['queue']),
 					sessionKey: sessionKey
                 });
             } else {
@@ -135,11 +141,11 @@ exports.add = (req, res) => {
 			"votes": 0
         }
 
-        queues[sessionKey]['songs'].push(songInfo);
+        queues[sessionKey]['queue'].push(songInfo);
 
         res.render('search.html', {
             access_token: queues[sessionKey]['access_token'],
-            song_list: JSON.stringify(queues[sessionKey]['songs']),
+            song_list: JSON.stringify(queues[sessionKey]['queue']),
 			sessionKey: sessionKey
         });
     });
@@ -154,7 +160,7 @@ exports.get_songs = (req, res) => {
 
 	// Songs are not sorted, sort then go
 	if (!queues[sessionKey]['sorted']) {
-		queues[sessionKey]['songs'].sort(function(a, b) {
+		queues[sessionKey]['queue'].sort(function(a, b) {
 			return b.votes - a.votes;
 		});
 		queues[sessionKey]['sorted'] = true;
@@ -169,7 +175,7 @@ exports.get_songs = (req, res) => {
 	} else {
 		var body = {
 	        'playing': queues[sessionKey]['playing'],
-	        'songs': queues[sessionKey]['songs']
+	        'songs': queues[sessionKey]['queue']
 	    }
 	    res.send(body);
 	}
@@ -203,11 +209,12 @@ exports.set_songs = (req, res) => {
 					"votes": 0
 				}
 
-				queues[sessionKey]['songs'].push(songInfo);
+				queues[sessionKey]['queue'].push(songInfo);
 			}
 		} else {
 			console.log(error, response);
 			res.sendStatus(400);
+			return;
 		}
 
 		if (playlistLength > 100 && offset < (playlistLength - 100)) {
@@ -291,7 +298,7 @@ function playNext(sessionKey) {
 	}
 
 	if (!queues[sessionKey]['sorted']) {
-		queues[sessionKey]['songs'].sort(function(a, b) {
+		queues[sessionKey]['queue'].sort(function(a, b) {
 			return b.votes - a.votes;
 		});
 		queues[sessionKey]['sorted'] = true;
@@ -299,9 +306,9 @@ function playNext(sessionKey) {
 
 	var access_token = queues[sessionKey]['access_token'];
 
-    if (queues[sessionKey]['songs'].length != 0) {
-
-        queues[sessionKey]['playing'] = queues[sessionKey]['songs'].shift();
+    if (queues[sessionKey]['queue'].length != 0) {
+    	queues[sessionKey]['played'].push(queues[sessionKey]['playing']);
+        queues[sessionKey]['playing'] = queues[sessionKey]['queue'].shift();
         var length_ms = queues[sessionKey]['playing']['duration_ms'];
 
         cmd_String = "curl -v -XPUT -i -H 'Authorization: Bearer " + access_token +
@@ -320,13 +327,19 @@ function playNext(sessionKey) {
 					console.log(err, data, stderr);
 				}
 			});
-		} while (retry);
+		} while (!retry);
+
+		if (!retry) {
+			console.log("There was an issue playing the next song that could not be resolved.  The session has been ended.")
+			delete queues[sessionKey];
+			return;
+		}
 
         queues[sessionKey]['song_timer'] = setTimeout(playNext, length_ms, sessionKey);
 
-    } else {
-        //console.log("Queue is empty");
     }
+
+    console.log(queues[sessionKey]['played']);
 }
 
 exports.play = (req, res) => {
@@ -336,8 +349,16 @@ exports.play = (req, res) => {
     	clearTimeout(queues[sessionKey]['song_timer']);
 	}
 
-    if (queues[sessionKey]['songs'].length != 0) {
-        queues[sessionKey]['playing'] = queues[sessionKey]['songs'].shift();
+    if (queues[sessionKey]['queue'].length != 0) {
+
+    	// If there was something playing, and we hit play again we are ineffect skipping that song.
+    	if (queues[sessionKey]['playing'] != {}) {
+    		queues[sessionKey]['skipped'].push(queues[sessionKey]['playing']);
+    		console.log("Song was skipped...");
+    		console.log(queues[sessionKey]['skipped']);
+    	}
+
+        queues[sessionKey]['playing'] = queues[sessionKey]['queue'].shift();
         var length_ms = queues[sessionKey]['playing']['duration_ms'];
 
         cmd_String = "curl -v -XPUT -i -H 'Authorization: Bearer " + req.body.access_token +
@@ -360,9 +381,7 @@ exports.play = (req, res) => {
 
         queues[sessionKey]['song_timer'] = setTimeout(playNext, length_ms, sessionKey);
 
-    } else {
-        //console.log("Add some songs to play!");
-    }
+    } 
     res.sendStatus(200);
 };
 
@@ -377,9 +396,9 @@ exports.upvote = (req, res) => {
 	queues[sessionKey]['sorted'] = false;
 
 	var uri = req.body.uri;
-	for (var i = 0; i < queues[sessionKey]['songs'].length; i++) {
-		if (queues[sessionKey]['songs'][i]['uri'] == uri) {
-			queues[sessionKey]['songs'][i]['votes']++;
+	for (var i = 0; i < queues[sessionKey]['queue'].length; i++) {
+		if (queues[sessionKey]['queue'][i]['uri'] == uri) {
+			queues[sessionKey]['queue'][i]['votes']++;
 		}
 	}
 	res.sendStatus(200);
@@ -390,9 +409,9 @@ exports.downvote = (req, res) => {
 	queues[sessionKey]['sorted'] = false;
 
 	var uri = req.body.uri;
-	for (var i = 0; i < queues[sessionKey]['songs'].length; i++) {
-		if (queues[sessionKey]['songs'][i]['uri'] == uri) {
-			queues[sessionKey]['songs'][i]['votes']--;
+	for (var i = 0; i < queues[sessionKey]['queue'].length; i++) {
+		if (queues[sessionKey]['queue'][i]['uri'] == uri) {
+			queues[sessionKey]['queue'][i]['votes']--;
 		}
 	}
 	res.sendStatus(200);
